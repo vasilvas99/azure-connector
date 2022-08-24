@@ -1,0 +1,38 @@
+# Maven
+target/
+
+# Checkstyle
+.checkstyle
+
+# PMD
+.pmd
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+
+# Mac
+.DS_Store
+
+# Go
+*.log
+*.*~
+*.exe
+things.db
+**/logs/
+cloudagent_coverage.out
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/

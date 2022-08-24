@@ -1,0 +1,15 @@
+{
+    "messageMappings" : {
+        "telemetry" : {
+            "1" : {
+                "telemetry-mapping" : {
+                    "protoFile" : "dummy_message.proto",
+                    "dittoMapping" : {
+                        "topic" : "/telemetry",
+                        "path" : "/outbox/messages/action"
+                    }
+                }
+            }
+        }
+    }
+}

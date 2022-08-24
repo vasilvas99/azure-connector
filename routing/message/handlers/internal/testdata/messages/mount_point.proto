@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package protomsg;
+
+// Defines a single mount point from the host to the container
+message MountPoint {
+
+    // Source path on the host
+    string source = 1;
+
+    // Destination in the container
+    string destination = 2;
+
+    // Propagation mode for the mount - private, rprivate, etc.
+    string propagation_mode = 3;
+}

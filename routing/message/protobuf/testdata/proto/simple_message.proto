@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package test.proto;
+
+message SimpleMessage {
+
+    string name = 1;
+
+    string value = 2;
+
+}

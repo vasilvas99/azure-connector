@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+import "simple_message.proto";
+
+package test.proto;
+
+message CompositeMessageSecondLevel {
+
+    string type = 1;
+
+    SimpleMessage composite = 2;
+}

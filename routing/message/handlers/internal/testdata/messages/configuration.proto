@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package protomsg;
+
+import "mount_point.proto";
+import "device_mapping.proto";
+import "port_mapping.proto";
+import "restart_policy.proto";
+import "log_config.proto";
+
+// Represents the container's process configuration
+message Configuration {
+
+	// Domain name for the container
+	string domain_name = 1;
+
+    // Provides the environmental configuration of the container's process - i.e. environmental variables
+    repeated string env = 2;
+
+    // Mounts for the container
+	repeated MountPoint mount_points = 3;
+
+    // Accessible devices from the host
+    repeated DeviceMapping devices = 4;
+    
+    // Whether the container has a privileged access to the host
+    bool privileged = 5;
+    
+    // The container's restart policy
+    RestartPolicy restart_policy = 6;
+    
+    // Additional host address for container to host communication
+    repeated string extra_hosts = 7;
+    
+    // Mapped ports
+    repeated PortMapping port_mappings = 8;
+
+    // Whether to open an STDIN on container startup
+    bool open_stdin = 9;
+    
+    // Whether to ensure a pseudo terminal on container startup
+    bool tty = 10;
+    
+    // Log configuration
+    LogConfiguration log = 11;
+
+}

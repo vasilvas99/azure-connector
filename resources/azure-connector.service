@@ -1,0 +1,14 @@
+[Unit]
+Description=Eclipse Kanto - Azure Connector
+Documentation=https://eclipse.org/kanto/docs/
+After=network.target mosquitto.service
+Requires=network.target
+Requires=mosquitto.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/azure-connector -configFile /etc/azure-connector/config.json
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

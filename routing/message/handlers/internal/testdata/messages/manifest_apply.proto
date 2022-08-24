@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package protomsg;
+
+import "manifest.proto";
+
+// Represents a containers configuration - i.e. manifest
+message ManifestApply {
+
+   // The Manifest to apply to the edge device
+   Manifest manifest = 1;
+   
+}

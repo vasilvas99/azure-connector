@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package test.proto;
+
+message InvalidMessage {
+
+	name string = 1
+
+	value string = 2
+}

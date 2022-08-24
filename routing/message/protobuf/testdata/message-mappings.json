@@ -1,0 +1,136 @@
+{
+    "messageMappings" : {
+        "telemetry" : {
+            "1" : {
+                "empty-messages" : {
+                    "protoFile" : "testdata/proto/empty_messages.proto"
+                },
+                "invalid-message" : {
+                    "protoFile" : "testdata/proto/invalid_message.proto"
+                },
+                "simple-message" : {
+                    "protoFile" : "testdata/proto/simple_message.proto",
+                    "protoMessage" : "SimpleMessage"
+                },
+                "dummy-message" : {
+                    "protoFile" : "testdata/proto/dummy_message.proto",
+                    "protoMessage" : "DummyMessage"
+                },
+                "dummy-message-missing" : {
+                    "protoFile" : "testdata/proto/dummy_message.proto"
+                },
+                "dummy-message-unsupported" : {
+                    "protoFile" : "testdata/proto/dummy_message.proto",
+                    "protoMessage" : "UnsupportedMessage"
+                },
+                "multiple-messages" : {
+                    "protoFile" : "testdata/proto/multiple_messages.proto",
+                    "protoMessage" : "Message1"
+                },
+                "multiple-messages-unsupported" : {
+                    "protoFile" : "testdata/proto/multiple_messages.proto",
+                    "protoMessage" : "UnsupportedMessage"
+                },
+                "multiple-messages-missing" : {
+                    "protoFile" : "testdata/proto/multiple_messages.proto"
+                },
+                "missing-messages-file" : {
+                    "protoFile" : "testdata/proto/missing_messages_file.proto"
+                },
+                "composite-message" : {
+                    "protoFile" : "testdata/proto/composite_message.proto",
+                    "protoMessage" : "CompositeMessage"
+                },
+                "composite-repeated-message" : {
+                    "protoFile" : "testdata/proto/composite_repeated_message.proto",
+                    "protoMessage" : "CompositeRepeatedMessage"
+                },
+                "nested-message" : {
+                    "protoFile" : "testdata/proto/nested_message.proto",
+                    "protoMessage" : "NestedMessage"
+                },
+                "nested-repeated-message" : {
+                    "protoFile" : "testdata/proto/nested_repeated_message.proto",
+                    "protoMessage" : "NestedRepeatedMessage"
+                },
+                "deep-nested-message" : {
+                    "protoFile" : "testdata/proto/deep_nested_message.proto",
+                    "protoMessage": "DeepNestedMessage"
+                },
+                "multiple-nested-message" : {
+                    "protoFile" : "testdata/proto/multiple_nested_message.proto",
+                    "protoMessage" : "NestedMessage"
+                },
+                "multiple-types-message" : {
+                    "protoFile" : "testdata/proto/multiple_types_message.proto",
+                    "protoMessage" : "MultipleTypesMessage"
+                }
+            }
+        },
+        "command" : {
+            "empty-messages" : {
+                "protoFile" : "testdata/proto/empty_messages.proto"
+            },
+            "invalid-message" : {
+                "protoFile" : "testdata/proto/invalid_message.proto"
+            },
+            "simple-message" : {
+                "protoFile" : "testdata/proto/simple_message.proto",
+                "protoMessage" : "SimpleMessage"
+            },
+            "dummy-message" : {
+                "protoFile" : "testdata/proto/dummy_message.proto",
+                "protoMessage" : "DummyMessage"
+            },
+            "dummy-message-missing" : {
+                "protoFile" : "testdata/proto/dummy_message.proto"
+            },
+            "dummy-message-unsupported" : {
+                "protoFile" : "testdata/proto/dummy_message.proto",
+                "protoMessage" : "UnsupportedMessage"
+            },
+            "multiple-messages" : {
+                "protoFile" : "testdata/proto/multiple_messages.proto",
+                "protoMessage" : "Message1"
+            },
+            "multiple-messages-unsupported" : {
+                "protoFile" : "testdata/proto/multiple_messages.proto",
+                "protoMessage" : "UnsupportedMessage"
+            },
+            "multiple-messages-missing" : {
+                "protoFile" : "testdata/proto/multiple_messages.proto"
+            },
+            "missing-messages-file" : {
+                "protoFile" : "testdata/proto/missing_messages_file.proto"
+            },
+            "composite-message" : {
+                "protoFile" : "testdata/proto/composite_message.proto",
+                "protoMessage" : "CompositeMessage"
+            },
+            "composite-repeated-message" : {
+                "protoFile" : "testdata/proto/composite_repeated_message.proto",
+                "protoMessage" : "CompositeRepeatedMessage"
+            },
+            "nested-message" : {
+                "protoFile" : "testdata/proto/nested_message.proto",
+                "protoMessage" : "NestedMessage"
+            },
+            "nested-repeated-message" : {
+                "protoFile" : "testdata/proto/nested_repeated_message.proto",
+                "protoMessage" : "NestedRepeatedMessage"
+            },
+            "deep-nested-message" : {
+                "protoFile" : "testdata/proto/deep_nested_message.proto",
+                "protoMessage": "DeepNestedMessage"
+            },
+            "multiple-nested-message" : {
+                "protoFile" : "testdata/proto/multiple_nested_message.proto",
+                "protoMessage" : "NestedMessage"
+            },
+            "multiple-types-message" : {
+                "protoFile" : "testdata/proto/multiple_types_message.proto",
+                "protoMessage" : "MultipleTypesMessage"
+            }
+        }
+    }
+}
