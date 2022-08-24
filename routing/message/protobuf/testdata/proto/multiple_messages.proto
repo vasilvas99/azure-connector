@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package test.proto;
+
+message Message1 {
+
+    string name = 1;
+
+    string value = 2;
+}
+
+message Message2 {
+
+    string value = 1;
+
+}

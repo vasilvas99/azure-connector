@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package protomsg;
+
+import "state.proto";
+
+message ContainerStateChanged {
+
+    //The name of the container
+	string name = 1;
+	
+	// The state of the container
+	State state = 2;
+	
+}

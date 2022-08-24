@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package protomsg;
+
+// ManifestError represents an error that has occurred while applying the provided manifest
+message ManifestError {
+
+  	// Represents a custom error code 
+  	int64 code = 1;
+  	
+  	// Represents a custom message that can be provided to help the error processing
+  	string message = 2;
+  	
+}

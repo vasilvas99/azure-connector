@@ -1,0 +1,80 @@
+{
+    "messageMappings" : {
+        "telemetry" : {
+            "1" : {
+                "telemetry-mapping" : {
+                    "protoFile" : "dummy_message.proto",
+                    "protoMessage" : "DummyMessage",
+                    "dittoMapping" : {
+                        "topic" : "/telemetry",
+                        "path" : "/outbox/messages/action"
+                    }
+                },
+                "missing-proto-message" : {
+                    "protoFile" : "dummy_message.proto",
+                    "dittoMapping" : {
+                        "topic" : "/missing_proto_message",
+                        "path" : "/outbox/messages/action"
+                    }
+                },
+                "missing-mapping-topic" : {
+                    "protoFile" : "dummy_message.proto",
+                    "protoMessage" : "DummyMessage",
+                    "dittoMapping" : {
+                        "path" : "/outbox/messages/action"
+                    }
+                },
+                "missing-mapping-path" : {
+                    "protoFile" : "dummy_message.proto",
+                    "protoMessage" : "DummyMessage",
+                    "dittoMapping" : {
+                        "topic" : "/missing_mapping_path"
+                    }
+                }
+            }
+        },
+        "command" : {
+            "command-mapping" : {
+                "protoFile" : "dummy_message.proto",
+                "protoMessage" : "DummyMessage",
+                "dittoMapping" : {
+                    "thing" : "command",
+                    "path" : "/outbox/messages/action",
+                    "action" : "action"
+                }
+            },
+            "missing-proto-message" : {
+                "protoFile" : "dummy_message.proto",
+                "dittoMapping" : {
+                    "thing" : "missing_proto_message",
+                    "path" : "/outbox/messages/action",
+                    "action" : "action"
+                }
+            },
+            "missing-mapping-thing" : {
+                "protoFile" : "dummy_message.proto",
+                "protoMessage" : "DummyMessage",
+                "dittoMapping" : {
+                    "path" : "/outbox/messages/action",
+                    "action" : "action"
+                }
+            },
+            "missing-mapping-path" : {
+                "protoFile" : "dummy_message.proto",
+                "protoMessage" : "DummyMessage",
+                "dittoMapping" : {
+                    "thing" : "missing_mapping_path",
+                    "action" : "action"
+                }
+            },
+            "missing-mapping-action" : {
+                "protoFile" : "dummy_message.proto",
+                "protoMessage" : "DummyMessage",
+                "dittoMapping" : {
+                    "thing" : "missing_mapping_action",
+                    "path" : "/outbox/messages/action"
+                }
+            }
+        }
+    }
+}

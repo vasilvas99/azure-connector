@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package test.proto;
+
+message DeepNestedMessage {
+
+    string type = 1;
+
+    NestedMessageSecondLevel nested = 2;
+}
+
+message NestedMessageSecondLevel {
+
+    string type = 1;
+
+    SimpleMessage nested = 2;
+}
+
+message SimpleMessage {
+
+    string name = 1;
+
+    string value = 2;
+}

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package protomsg;
+
+// Represents port mapping from the host to a container
+message PortMapping {
+
+    // Protocol
+    string proto = 1;
+    
+    // Host port
+    int64 host_port = 2;
+    
+    // Host port range end
+    int64 host_port_end = 3;
+    
+    // Container port
+    int64 container_port = 4;
+
+    // Host IP
+    string host_iP = 5;
+}

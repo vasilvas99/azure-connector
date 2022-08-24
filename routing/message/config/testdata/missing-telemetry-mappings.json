@@ -1,0 +1,14 @@
+{
+    "messageMappings" : {
+        "command" : {
+            "commang-mapping" : {
+                "protoFile" : "dummy_message.proto",
+                "dittoMapping" : {
+                    "thing" : "command",
+                    "path" : "/outbox/messages/action",
+                    "action" : "action"
+                }
+            }
+        }
+    }
+}

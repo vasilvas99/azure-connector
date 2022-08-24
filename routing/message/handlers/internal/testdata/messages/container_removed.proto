@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package protomsg;
+
+message ContainerRemoved {
+
+    //The name of the container
+	string name = 1;
+	
+}
