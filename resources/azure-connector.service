@@ -7,7 +7,7 @@ Requires=mosquitto.service
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/azure-connector -configFile /etc/azure-connector/config.json
+ExecStart=/usr/bin/azure-connector -configFile /etc/azure-connector/config.json
 Restart=always
 
 [Install]
