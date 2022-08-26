@@ -1,18 +1,1 @@
-*.sh text eol=lf
-server text eol=lf
-server.* text eol=lf
-#assemblies/*/src/*/resources/** auto eol=lf
-
-*.crp -text
-*.ico -text
-*.jpg -text
-*.png -text
-*.jpeg -text
-*.lnk -text
-*.gz -text
-*.bz2 -text
-*.xz -text
-*.tar -text
-
-*.bat text eol=crlf
-*.vcproj text eol=crlf
+*.go text eol=lf
