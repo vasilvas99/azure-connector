@@ -39,7 +39,7 @@ func TestThingsMessageHandler(t *testing.T) {
 		AllowedCloudMessageTypesList: "testVal,testCommand",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, err := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	require.NoError(t, err)
 	messageHandler := &commandThingsMessageHandler{}
 
@@ -297,7 +297,7 @@ func createCommandThingsHandler(t *testing.T) handlers.MessageHandler {
 		AllowedCloudMessageTypesList: "testVal,testCommand",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, err := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	require.NoError(t, err)
 	messageHandler := &commandThingsMessageHandler{}
 	messageHandler.Init(settings, connSettings)

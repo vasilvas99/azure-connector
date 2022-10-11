@@ -45,7 +45,7 @@ func TestNoTelemetryMessageHandlers(t *testing.T) {
 		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
 
 	telemetryHandlers := []handlers.MessageHandler{}
@@ -58,7 +58,7 @@ func TestTelemetryMessageHandlerWithoutTopics(t *testing.T) {
 		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
 
 	telemetryHandler := test.NewDummyMessageHandler(testTelemetryHandlerName, []string{}, nil)
@@ -72,7 +72,7 @@ func TestSingleTelemetryMessageHandler(t *testing.T) {
 		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
 
 	telemetryHandler := test.NewDummyMessageHandler(testTelemetryHandlerName, []string{"telemetry/#"}, nil)
@@ -91,7 +91,7 @@ func TestMultipleTelemetryMessageHandlers(t *testing.T) {
 		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
 
 	handlerNames := []string{"test_handler_1", "test_handler_2", "test_handler_3"}
@@ -117,7 +117,7 @@ func TestTelemetryMessageHandlerInitializationError(t *testing.T) {
 		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
 
 	telemetryHandler := test.NewDummyMessageHandler(testTelemetryHandlerName, []string{"telemetry/#"}, errors.New("init error"))

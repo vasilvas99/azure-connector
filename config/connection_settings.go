@@ -56,8 +56,8 @@ type AzureConnectionSettings struct {
 	*SharedAccessKey
 }
 
-// CreateAzureConnectionSettings creates the configuration data for establishing connection to the Azure IoT Hub.
-func CreateAzureConnectionSettings(settings *AzureSettings, log logger.Logger) (*AzureConnectionSettings, error) {
+// PrepareAzureConnectionSettings prepares the configuration data for establishing connection to the Azure IoT Hub, allowing usage of IDScopeProvider.
+func PrepareAzureConnectionSettings(settings *AzureSettings, idScopeProvider IDScopeProvider, log logger.Logger) (*AzureConnectionSettings, error) {
 	connProps, err := parseConnectionString(settings.ConnectionString)
 	if err != nil {
 		return nil, err
@@ -86,7 +86,7 @@ func CreateAzureConnectionSettings(settings *AzureSettings, log logger.Logger) (
 		return nil, err
 	}
 	if hasDeviceID && hasHostName {
-		return CreateAzureCertificateConnectionSettings(connProps, certFileReader, keyFileReader)
+		return PrepareAzureCertificateConnectionSettings(connProps, certFileReader, keyFileReader)
 	}
 
 	useProvisioningClient := !conn.FileExists(provisioningJSONConfig)
@@ -95,8 +95,9 @@ func CreateAzureConnectionSettings(settings *AzureSettings, log logger.Logger) (
 		return nil, err
 	}
 
-	connSettings, err := CreateAzureProvisioningConnectionSettings(
+	connSettings, err := PrepareAzureProvisioningConnectionSettings(
 		settings,
+		idScopeProvider,
 		NewProvisioningService(log),
 		provisioningFile,
 		useProvisioningClient,
@@ -110,8 +111,8 @@ func CreateAzureConnectionSettings(settings *AzureSettings, log logger.Logger) (
 	return connSettings, nil
 }
 
-// CreateAzureCertificateConnectionSettings creates the configuration data for establishing connection to the Azure IoT Hub via X.509 certificate.
-func CreateAzureCertificateConnectionSettings(
+// PrepareAzureCertificateConnectionSettings prepares the configuration data for establishing connection to the Azure IoT Hub via X.509 certificate.
+func PrepareAzureCertificateConnectionSettings(
 	connStringProperties map[string]string,
 	certFileReader io.Reader,
 	keyFileReader io.Reader,
@@ -133,9 +134,10 @@ func CreateAzureCertificateConnectionSettings(
 	return connSettings, nil
 }
 
-// CreateAzureProvisioningConnectionSettings creates the configuration data for establishing connection to Azure device that requires device provisioning.
-func CreateAzureProvisioningConnectionSettings(
+// PrepareAzureProvisioningConnectionSettings prepares the configuration data for establishing connection to Azure IoT Hub that requires device provisioning, allowing usage of IDScopeProvider.
+func PrepareAzureProvisioningConnectionSettings(
 	settings *AzureSettings,
+	idScopeProvider IDScopeProvider,
 	provisioningService ProvisioningService,
 	provisioningFile io.ReadWriter,
 	useProvisioningClient bool,
@@ -156,6 +158,13 @@ func CreateAzureProvisioningConnectionSettings(
 		}
 	}
 	provisioningService.Init(client, provisioningFile)
+
+	if len(settings.IDScope) == 0 && idScopeProvider != nil {
+		settings.IDScope, err = idScopeProvider(connSettings)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	azureDeviceData, err := provisioningService.GetDeviceData(settings.IDScope, connSettings)
 	if err != nil {

@@ -33,7 +33,7 @@ func TestPassthroughMessageHandler(t *testing.T) {
 		AllowedLocalTopicsList: "localTopic1,localTopic2,localTopic3",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, err := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	require.NoError(t, err)
 	messageHandler := &passthroughMessageHandler{}
 
@@ -62,7 +62,7 @@ func createPassthroughMessageHandler(t *testing.T) handlers.MessageHandler {
 		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, err := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	require.NoError(t, err)
 	messageHandler := &passthroughMessageHandler{}
 	require.NoError(t, messageHandler.Init(settings, connSettings))

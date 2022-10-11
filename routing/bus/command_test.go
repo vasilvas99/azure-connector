@@ -49,7 +49,7 @@ func TestRegisterCommandMessageHandler(t *testing.T) {
 		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
 
 	commandHandlers := []handlers.MessageHandler{}
@@ -67,7 +67,7 @@ func TestRegisterCommandMessageHandlerInitializationError(t *testing.T) {
 		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
 
 	commandHandler := test.NewDummyMessageHandler(testCommandHandlerName, []string{commandName}, errors.New(""))

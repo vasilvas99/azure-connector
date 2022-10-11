@@ -37,7 +37,7 @@ func TestThingsMessageHandler(t *testing.T) {
 		MessageMapperConfig: "../internal/testdata/handlers-mapper-config.json",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, err := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	require.NoError(t, err)
 	messageHandler := &telemetryThingsMessageHandler{}
 
@@ -418,7 +418,7 @@ func createTelemetryMessageHandler(t *testing.T) handlers.MessageHandler {
 		MessageMapperConfig: "../internal/testdata/handlers-mapper-config.json",
 	}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, err := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	require.NoError(t, err)
 	messageHandler := &telemetryThingsMessageHandler{}
 	messageHandler.Init(settings, connSettings)

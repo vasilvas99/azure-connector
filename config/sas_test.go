@@ -34,7 +34,7 @@ func TestGenerateSASToken(t *testing.T) {
 	settings := &config.AzureSettings{ConnectionString: connectionString}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
 
-	connSettings, err := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	require.NoError(t, err)
 
 	sasToken := config.GenerateSASToken(connSettings)

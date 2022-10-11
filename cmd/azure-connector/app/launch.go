@@ -177,16 +177,9 @@ func MainLoop(settings *azurecfg.AzureSettings, log logger.Logger, idScopeProvid
 	statusPub := connector.NewPublisher(localClient, connector.QosAtLeastOnce, log, nil)
 	defer statusPub.Close()
 
-	connSettings, err := azurecfg.CreateAzureConnectionSettings(settings, log)
+	connSettings, err := azurecfg.PrepareAzureConnectionSettings(settings, idScopeProvider, log)
 	if err != nil {
 		return errors.Wrap(err, "cannot create Azure IoT Hub device connection settings")
-	}
-
-	if len(settings.IDScope) == 0 && idScopeProvider != nil {
-		settings.IDScope, err = idScopeProvider(connSettings)
-		if err != nil {
-			return err
-		}
 	}
 
 	done := make(chan bool, 1)

@@ -34,11 +34,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestParseEmptyConnectionString(t *testing.T) {
+	settings := &config.AzureSettings{ConnectionString: ""}
+	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
+	_, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
+	require.Error(t, err)
+}
+
 func TestParseMalformedConnectionString(t *testing.T) {
 	connectionString := "HostName=dummy-hub.azure-devices.net;DeviceId;cGFzc3dvcmQ="
 	settings := &config.AzureSettings{ConnectionString: connectionString}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	_, err := config.CreateAzureConnectionSettings(settings, logger)
+	_, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	require.Error(t, err)
 }
 
@@ -46,7 +53,7 @@ func TestCreateTokenConnectionSettings(t *testing.T) {
 	connectionString := "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=cGFzc3dvcmQ="
 	settings := &config.AzureSettings{ConnectionString: connectionString}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, err := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 
 	require.NoError(t, err)
 	decodedSharedAccessKey, _ := base64.StdEncoding.DecodeString("cGFzc3dvcmQ=")
@@ -64,7 +71,7 @@ func TestMalformedSharedAccessKey(t *testing.T) {
 	connectionString := "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=x7HrdC+URzEneFam9ZKa0Ke7="
 	settings := &config.AzureSettings{ConnectionString: connectionString}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	_, err := config.CreateAzureConnectionSettings(settings, logger)
+	_, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	require.Error(t, err)
 }
 
@@ -72,7 +79,7 @@ func TestSASTokenValidityPeriod(t *testing.T) {
 	connectionString := "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=cGFzc3dvcmQ="
 	settings := &config.AzureSettings{ConnectionString: connectionString, SASTokenValidity: "2h"}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, err := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 
 	require.NoError(t, err)
 	assert.Equal(t, 2*time.Hour, connSettings.TokenValidity)
@@ -82,7 +89,7 @@ func TestFallbackDefaultSASTokenValidityPeriod(t *testing.T) {
 	connectionString := "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=cGFzc3dvcmQ="
 	settings := &config.AzureSettings{ConnectionString: connectionString, SASTokenValidity: "invalid-sas-token-validity"}
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, err := config.CreateAzureConnectionSettings(settings, logger)
+	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 
 	require.NoError(t, err)
 	assert.Equal(t, time.Hour, connSettings.TokenValidity)
@@ -104,7 +111,7 @@ func TestTokenConnectionSettingsMissingRequiredProperties(t *testing.T) {
 		t.Run(testValues.missingProperty, func(t *testing.T) {
 			settings := &config.AzureSettings{ConnectionString: testValues.connString}
 			logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-			_, err := config.CreateAzureConnectionSettings(settings, logger)
+			_, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 			require.Error(t, err)
 		})
 	}
@@ -132,7 +139,7 @@ func TestTokenConnectionSettingsInvalidHostName(t *testing.T) {
 		t.Run(testValues.name, func(t *testing.T) {
 			settings := &config.AzureSettings{ConnectionString: testValues.connString}
 			logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-			_, err := config.CreateAzureConnectionSettings(settings, logger)
+			_, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 			require.Error(t, err)
 		})
 	}
@@ -160,7 +167,7 @@ func TestCertificateConnectionSettingsMissingRequiredProperties(t *testing.T) {
 				},
 			}
 			logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-			_, err := config.CreateAzureConnectionSettings(settings, logger)
+			_, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 			require.Error(t, err)
 		})
 	}
@@ -170,7 +177,7 @@ func TestCreateCertificateConnectionSettings(t *testing.T) {
 	connStringProperties := map[string]string{"HostName": "dummy-hub.azure-devices.net", "DeviceId": "dummy-device"}
 	certFileReader := test.CreateDeviceCertificateReader()
 	keyFileReader := test.CreateCertificateKeyReader()
-	connSettings, err := config.CreateAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
+	connSettings, err := config.PrepareAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
 
 	require.NoError(t, err)
 	assert.Equal(t, "dummy-device", connSettings.DeviceID)
@@ -202,7 +209,7 @@ func TestCertificateConnectionSettingsInvalidHostName(t *testing.T) {
 			connStringProperties := map[string]string{"HostName": testValues.hostName, "DeviceId": "dummy-device"}
 			certFileReader := test.CreateDeviceCertificateReader()
 			keyFileReader := test.CreateCertificateKeyReader()
-			_, err := config.CreateAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
+			_, err := config.PrepareAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
 			require.Error(t, err)
 		})
 	}
@@ -235,7 +242,7 @@ func TestCertificateConnectionSettingsMissingCertParams(t *testing.T) {
 				},
 			}
 			logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-			_, err := config.CreateAzureConnectionSettings(settings, logger)
+			_, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 			require.Error(t, err)
 		})
 	}
@@ -265,7 +272,7 @@ func TestCertificateConnectionPropertiesInvalidCertAndKeyPaths(t *testing.T) {
 				},
 			}
 			logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-			_, err := config.CreateAzureConnectionSettings(settings, logger)
+			_, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 			require.Error(t, err)
 		})
 	}
@@ -275,7 +282,7 @@ func TestCertificateConnectionSettingsNoCertificate(t *testing.T) {
 	connStringProperties := map[string]string{"HostName": "dummy-device.azure-devices.net", "DeviceId": "dummy-device"}
 	certFileReader := strings.NewReader("")
 	keyFileReader := test.CreateCertificateKeyReader()
-	_, err := config.CreateAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
+	_, err := config.PrepareAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
 	require.Error(t, err)
 }
 
@@ -283,7 +290,7 @@ func TestCertificateConnectionSettingsMalformedCertificate(t *testing.T) {
 	connStringProperties := map[string]string{"HostName": "dummy-device.azure-devices.net", "DeviceId": "dummy-device"}
 	certFileReader := test.CreateMalformedDeviceCertificateReader()
 	keyFileReader := test.CreateCertificateKeyReader()
-	_, err := config.CreateAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
+	_, err := config.PrepareAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
 	require.Error(t, err)
 }
 
@@ -291,7 +298,7 @@ func TestCertificateConnectionSettingsNoCertificateKey(t *testing.T) {
 	connStringProperties := map[string]string{"HostName": "dummy-device.azure-devices.net", "DeviceId": "dummy-device"}
 	certFileReader := test.CreateDeviceCertificateReader()
 	keyFileReader := strings.NewReader("")
-	connSettings, err := config.CreateAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
+	connSettings, err := config.PrepareAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
 
 	require.NoError(t, err)
 	assert.Equal(t, test.DeviceCertificate(), connSettings.DeviceCert)
@@ -302,7 +309,7 @@ func TestCertificateConnectionSettingsMalformedCertificateKey(t *testing.T) {
 	connStringProperties := map[string]string{"HostName": "dummy-device.azure-devices.net", "DeviceId": "dummy-device"}
 	certFileReader := test.CreateDeviceCertificateReader()
 	keyFileReader := test.CreateMalformedCertificateKeyReader()
-	connSettings, err := config.CreateAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
+	connSettings, err := config.PrepareAzureCertificateConnectionSettings(connStringProperties, certFileReader, keyFileReader)
 
 	require.NoError(t, err)
 	assert.Equal(t, test.DeviceCertificate(), connSettings.DeviceCert)
@@ -316,7 +323,7 @@ func TestCreateProvisioningConnectionSettings(t *testing.T) {
 	provisioningService := mockProvisioningService(t, controller, createGetDeviceData(), nil, false, 1, 1)
 	certFileReader := test.CreateDeviceCertificateReader()
 	keyFileReader := test.CreateCertificateKeyReader()
-	connSettings, err := config.CreateAzureProvisioningConnectionSettings(&config.AzureSettings{}, provisioningService, nil, true, certFileReader, keyFileReader)
+	connSettings, err := config.PrepareAzureProvisioningConnectionSettings(&config.AzureSettings{}, nil, provisioningService, nil, true, certFileReader, keyFileReader)
 
 	require.NoError(t, err)
 	assert.Equal(t, "dummy-device", connSettings.DeviceID)
@@ -328,6 +335,37 @@ func TestCreateProvisioningConnectionSettings(t *testing.T) {
 	assert.Equal(t, test.CertificateKey(), connSettings.DeviceKey)
 }
 
+func TestCreateProvisioningConnectionSettingsWithIdScope(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+
+	provisioningService := mockProvisioningServiceWithIDScope(t, controller, createGetDeviceData(), nil, 1, 1)
+	certFileReader := test.CreateDeviceCertificateReader()
+	keyFileReader := test.CreateCertificateKeyReader()
+	connSettings, err := config.PrepareAzureProvisioningConnectionSettings(&config.AzureSettings{}, dummyIdScopeProvider, provisioningService, nil, true, certFileReader, keyFileReader)
+
+	require.NoError(t, err)
+	assert.Equal(t, "dummy-device", connSettings.DeviceID)
+	assert.Equal(t, "dummy-hub.azure-devices.net", connSettings.HostName)
+	assert.Equal(t, "dummy-hub", connSettings.HubName)
+	assert.Nil(t, connSettings.SharedAccessKey)
+	assert.Equal(t, 0*time.Second, connSettings.TokenValidity)
+	assert.Equal(t, test.DeviceCertificate(), connSettings.DeviceCert)
+	assert.Equal(t, test.CertificateKey(), connSettings.DeviceKey)
+}
+
+func TestCreateProvisioningConnectionSettingsWithIdScopeError(t *testing.T) {
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+
+	provisioningService := mockProvisioningServiceWithIDScope(t, controller, createGetDeviceData(), nil, 0, 1)
+	certFileReader := test.CreateDeviceCertificateReader()
+	keyFileReader := test.CreateCertificateKeyReader()
+	_, err := config.PrepareAzureProvisioningConnectionSettings(&config.AzureSettings{}, dummyIdScopeProviderWithError, provisioningService, nil, true, certFileReader, keyFileReader)
+
+	require.Error(t, err)
+}
+
 func TestCreateProvisioningConnectionSettingsExistingProvisioningFile(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
@@ -335,7 +373,7 @@ func TestCreateProvisioningConnectionSettingsExistingProvisioningFile(t *testing
 	provisioningService := mockProvisioningService(t, controller, createGetDeviceData(), nil, true, 1, 1)
 	certFileReader := test.CreateDeviceCertificateReader()
 	keyFileReader := test.CreateCertificateKeyReader()
-	connSettings, err := config.CreateAzureProvisioningConnectionSettings(&config.AzureSettings{}, provisioningService, nil, false, certFileReader, keyFileReader)
+	connSettings, err := config.PrepareAzureProvisioningConnectionSettings(&config.AzureSettings{}, nil, provisioningService, nil, false, certFileReader, keyFileReader)
 
 	require.NoError(t, err)
 	assert.Equal(t, "dummy-device", connSettings.DeviceID)
@@ -355,7 +393,7 @@ func TestProvisioningConnectionSettingsErrorGetDeviceData(t *testing.T) {
 	provisioningService := mockProvisioningService(t, controller, nil, errors.New("cannot access DPS."), false, 1, 1)
 	certFileReader := test.CreateDeviceCertificateReader()
 	keyFileReader := test.CreateCertificateKeyReader()
-	_, err := config.CreateAzureProvisioningConnectionSettings(&config.AzureSettings{}, provisioningService, nil, true, certFileReader, keyFileReader)
+	_, err := config.PrepareAzureProvisioningConnectionSettings(&config.AzureSettings{}, nil, provisioningService, nil, true, certFileReader, keyFileReader)
 
 	require.Error(t, err)
 }
@@ -389,7 +427,7 @@ func TestProvisioningConnectionSettingsInvalidCertAndKey(t *testing.T) {
 		t.Run(testValues.name, func(t *testing.T) {
 			controller := gomock.NewController(t)
 			provisioningService := mockProvisioningService(t, controller, createGetDeviceData(), nil, false, 0, 0)
-			_, err := config.CreateAzureProvisioningConnectionSettings(&config.AzureSettings{}, provisioningService, nil, true, testValues.certReader, testValues.certKeyReader)
+			_, err := config.PrepareAzureProvisioningConnectionSettings(&config.AzureSettings{}, nil, provisioningService, nil, true, testValues.certReader, testValues.certKeyReader)
 			controller.Finish()
 			require.Error(t, err)
 		})
@@ -403,7 +441,7 @@ func TestProvisioningConnectionSettingsNoCertificates(t *testing.T) {
 	provisioningService := mockProvisioningService(t, controller, createGetDeviceData(), nil, false, 0, 0)
 	certFileReader := strings.NewReader("")
 	keyFileReader := test.CreateCertificateKeyReader()
-	_, err := config.CreateAzureProvisioningConnectionSettings(&config.AzureSettings{IDScope: "dummyIdScope"}, provisioningService, nil, true, certFileReader, keyFileReader)
+	_, err := config.PrepareAzureProvisioningConnectionSettings(&config.AzureSettings{IDScope: "dummyIdScope"}, nil, provisioningService, nil, true, certFileReader, keyFileReader)
 
 	require.Error(t, err)
 }
@@ -434,7 +472,7 @@ func TestProvisioningConnectionSettingsMalformedHostName(t *testing.T) {
 			provisioningService := mockProvisioningService(t, controller, deviceData, nil, false, 1, 1)
 			certFileReader := test.CreateDeviceCertificateReader()
 			keyFileReader := test.CreateCertificateKeyReader()
-			_, err := config.CreateAzureProvisioningConnectionSettings(&config.AzureSettings{}, provisioningService, nil, true, certFileReader, keyFileReader)
+			_, err := config.PrepareAzureProvisioningConnectionSettings(&config.AzureSettings{}, nil, provisioningService, nil, true, certFileReader, keyFileReader)
 			require.Error(t, err)
 		})
 	}
@@ -451,9 +489,28 @@ func mockProvisioningService(t *testing.T, controller *gomock.Controller, device
 	return provisioningService
 }
 
+func mockProvisioningServiceWithIDScope(t *testing.T, controller *gomock.Controller, deviceData *config.AzureDeviceData, deviceDataError error, timesGetDataCalled, timesInitCalled int) *mock.MockProvisioningService {
+	provisioningService := mock.NewMockProvisioningService(controller)
+	provisioningService.EXPECT().GetDeviceData("dummyIdScope", gomock.Any()).Return(deviceData, deviceDataError).Times(timesGetDataCalled)
+	provisioningService.EXPECT().Init(gomock.Any(), gomock.Any()).Do(func(client config.ProvisioningHTTPClient, provisioningFile io.ReadWriter) {
+		if client == nil {
+			t.Error("Provisioning Service initialized without a client.")
+		}
+	}).Times(timesInitCalled)
+	return provisioningService
+}
+
 func createGetDeviceData() *config.AzureDeviceData {
 	return &config.AzureDeviceData{
 		AssignedHub: "dummy-hub.azure-devices.net",
 		DeviceID:    "dummy-device",
 	}
+}
+
+func dummyIdScopeProvider(connSettings *config.AzureConnectionSettings) (string, error) {
+	return "dummyIdScope", nil
+}
+
+func dummyIdScopeProviderWithError(connSettings *config.AzureConnectionSettings) (string, error) {
+	return "", errors.New("invalid url")
 }
