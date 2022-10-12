@@ -50,6 +50,7 @@ type dummyMessageHandler struct {
 	handleName string
 	topics     []string
 	initErr    error
+	handleErr  error
 }
 
 func (h *dummyMessageHandler) Init(settings *config.AzureSettings, connSettings *config.AzureConnectionSettings) error {
@@ -57,6 +58,9 @@ func (h *dummyMessageHandler) Init(settings *config.AzureSettings, connSettings 
 }
 
 func (h *dummyMessageHandler) HandleMessage(msg *message.Message) ([]*message.Message, error) {
+	if h.handleErr != nil {
+		return nil, h.handleErr
+	}
 	msg.Metadata["handler_name"] = h.handleName
 	return []*message.Message{msg}, nil
 }
@@ -75,6 +79,15 @@ func NewDummyMessageHandler(handlerName string, topics []string, initErr error) 
 		handleName: handlerName,
 		topics:     topics,
 		initErr:    initErr,
+	}
+}
+
+// NewDummyFailureHandler instantiates a new dummy Watermill message handler that can return error on message handling.
+func NewDummyFailureHandler(handlerName string, topics []string, handleErr error) handlers.MessageHandler {
+	return &dummyMessageHandler{
+		handleName: handlerName,
+		topics:     topics,
+		handleErr:  handleErr,
 	}
 }
 

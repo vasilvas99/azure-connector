@@ -4,11 +4,9 @@ go 1.17
 
 require (
 	github.com/ThreeDotsLabs/watermill v1.1.1
-	github.com/eclipse-kanto/suite-connector v0.1.0-M1.0.20220701113052-ccfe8296aa68
-	github.com/eclipse/ditto-clients-golang v0.0.0-20220225085802-cf3b306280d3
+	github.com/eclipse-kanto/suite-connector v0.1.0-M2
 	github.com/golang/mock v1.6.0
 	github.com/imdario/mergo v0.3.12
-	github.com/jhump/protoreflect v1.8.2
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/goleak v1.1.10
@@ -18,9 +16,9 @@ require (
 	github.com/Jeffail/gabs/v2 v2.6.0 // indirect
 	github.com/cenkalti/backoff/v3 v3.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/eclipse/ditto-clients-golang v0.0.0-20220225085802-cf3b306280d3 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.4.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
-	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-tpm v0.3.2 // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
@@ -36,8 +34,6 @@ require (
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
 	golang.org/x/tools v0.1.1 // indirect
-	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
-	google.golang.org/protobuf v1.25.1-0.20200805231151-a709e31e5d12 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )

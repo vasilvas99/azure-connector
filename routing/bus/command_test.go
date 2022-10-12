@@ -13,12 +13,10 @@
 package bus
 
 import (
-	"encoding/json"
 	"errors"
 	"io"
 	"log"
 	"reflect"
-	"strconv"
 	"testing"
 
 	"github.com/ThreeDotsLabs/watermill"
@@ -27,8 +25,6 @@ import (
 	"github.com/eclipse-kanto/azure-connector/config"
 	"github.com/eclipse-kanto/azure-connector/routing"
 	test "github.com/eclipse-kanto/azure-connector/routing/bus/internal/testing"
-	routingmessage "github.com/eclipse-kanto/azure-connector/routing/message"
-	"github.com/eclipse-kanto/azure-connector/routing/message/handlers/command"
 	handlers "github.com/eclipse-kanto/azure-connector/routing/message/handlers/common"
 
 	conn "github.com/eclipse-kanto/suite-connector/connector"
@@ -89,73 +85,38 @@ func TestInvalidCloudMessagePayload(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestNoCommandMessageHandlerForMessage(t *testing.T) {
+func TestNoCommandHandlerForMessage(t *testing.T) {
 	busHandler := &commandBusHandler{}
-	msg := createWatermillMessage(commandName)
-	_, err := busHandler.HandleMessage(msg)
+	_, err := busHandler.HandleMessage(message.NewMessage(watermill.NewUUID(), message.Payload("dummy_payload")))
 	require.Error(t, err)
 }
-func TestSupportedCommandName(t *testing.T) {
-	commandHandler := test.NewDummyMessageHandler(testCommandHandlerName, []string{commandName}, nil)
-	commandHandlers := []handlers.MessageHandler{commandHandler}
-	busHandler := &commandBusHandler{commandHandlers: commandHandlers}
 
-	outgoingMessages, err := busHandler.HandleMessage(createWatermillMessage(commandName))
+func TestFirstValidCommandMessageHandler(t *testing.T) {
+	commandHandler1 := test.NewDummyFailureHandler(testCommandHandlerName+"_1", nil, errors.New(""))
+	commandHandler2 := test.NewDummyMessageHandler(testCommandHandlerName+"_2", nil, nil)
+	commandHandler3 := test.NewDummyFailureHandler(testCommandHandlerName+"_3", nil, errors.New(""))
+	commandHandlers := []handlers.MessageHandler{commandHandler1, commandHandler2, commandHandler3}
+
+	busHandler := &commandBusHandler{logger: watermill.NopLogger{}, commandHandlers: commandHandlers}
+
+	outgoingMessages, err := busHandler.HandleMessage(message.NewMessage(watermill.NewUUID(), message.Payload("dummy_payload")))
 	require.NoError(t, err)
 	assert.NotNil(t, outgoingMessages)
 	assert.Equal(t, len(outgoingMessages), 1)
-	assert.NotNil(t, command.MessageFromContext(outgoingMessages[0]))
-}
-
-func TestFirstMatchedCommandMessageHandler(t *testing.T) {
-	var commandHandlers []handlers.MessageHandler
-	commandNames := []string{"command.name.1", "command.name.2", "command.name.3"}
-	for i, commandName := range commandNames {
-		commandHandler := test.NewDummyMessageHandler(testCommandHandlerName+"_"+strconv.Itoa(i+1), []string{commandName}, nil)
-		commandHandlers = append(commandHandlers, commandHandler)
-	}
-	busHandler := &commandBusHandler{commandHandlers: commandHandlers}
-
-	outgoingMessages, err := busHandler.HandleMessage(createWatermillMessage("command.name.2"))
-	require.NoError(t, err)
-	assert.NotNil(t, outgoingMessages)
-	assert.Equal(t, len(outgoingMessages), 1)
-	assert.NotNil(t, command.MessageFromContext(outgoingMessages[0]))
 	assert.Equal(t, "test_command_handler_2", outgoingMessages[0].Metadata["handler_name"])
 }
 
-func TestMultipleCommandMessageHandlersForCommand(t *testing.T) {
-	var commandHandlers []handlers.MessageHandler
-	for i := 0; i < 3; i++ {
-		commandHandler := test.NewDummyMessageHandler(testCommandHandlerName+"_"+strconv.Itoa(i+1), []string{commandName}, nil)
-		commandHandlers = append(commandHandlers, commandHandler)
-	}
-	busHandler := &commandBusHandler{commandHandlers: commandHandlers}
+func TestMultipleCommandMessageHandlers(t *testing.T) {
+	commandHandler1 := test.NewDummyMessageHandler(testCommandHandlerName+"_1", nil, nil)
+	commandHandler2 := test.NewDummyMessageHandler(testCommandHandlerName+"_2", nil, nil)
+	commandHandler3 := test.NewDummyMessageHandler(testCommandHandlerName+"_3", nil, nil)
+	commandHandlers := []handlers.MessageHandler{commandHandler1, commandHandler2, commandHandler3}
 
-	outgoingMessages, err := busHandler.HandleMessage(createWatermillMessage(commandName))
+	busHandler := &commandBusHandler{logger: watermill.NopLogger{}, commandHandlers: commandHandlers}
+
+	outgoingMessages, err := busHandler.HandleMessage(message.NewMessage(watermill.NewUUID(), message.Payload("dummy_payload")))
 	require.NoError(t, err)
 	assert.NotNil(t, outgoingMessages)
 	assert.Equal(t, len(outgoingMessages), 1)
-	assert.NotNil(t, command.MessageFromContext(outgoingMessages[0]))
 	assert.Equal(t, "test_command_handler_1", outgoingMessages[0].Metadata["handler_name"])
-}
-
-func TestNotSupportedCommandName(t *testing.T) {
-	commandHandler := test.NewDummyMessageHandler(testCommandHandlerName, []string{commandName}, nil)
-	commandHandlers := []handlers.MessageHandler{commandHandler}
-	busHandler := &commandBusHandler{commandHandlers: commandHandlers}
-	_, err := busHandler.HandleMessage(createWatermillMessage(notSupportedCommandName))
-	require.Error(t, err)
-}
-
-func createWatermillMessage(commandName string) *message.Message {
-	cloudMessage := &routingmessage.CloudMessage{
-		ApplicationID:   "app1",
-		CommandName:     commandName,
-		EnvelopeVersion: "1.0.0",
-		PayloadVersion:  "1.0.0",
-		Payload:         "{}",
-	}
-	jsonPayload, _ := json.Marshal(cloudMessage)
-	return message.NewMessage(watermill.NewUUID(), message.Payload(jsonPayload))
 }

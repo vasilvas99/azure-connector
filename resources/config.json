@@ -1,5 +1,4 @@
 {
-    "cacert": "/etc/azure-connector/iothub.crt",
-    "provisioningFile": "/etc/azure-connector/provisioning.json",
+    "caCert": "/etc/azure-connector/iothub.crt",
     "logFile": "/var/log/azure-connector/azure-connector.log"
 }

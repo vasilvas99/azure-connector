@@ -10,20 +10,51 @@
 //
 // SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 
-//go:build !things
-// +build !things
-
 package flags_test
 
 import (
 	"flag"
+	"io"
+	"os"
 	"testing"
 
 	"github.com/eclipse-kanto/azure-connector/config"
 	"github.com/eclipse-kanto/azure-connector/flags"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestVersionParse(t *testing.T) {
+	exitCall := false
+	exit := func(_ int) {
+		exitCall = true
+	}
+
+	f := flag.NewFlagSet("testing", flag.ContinueOnError)
+	cmd := new(config.AzureSettings)
+	flags.Add(f, cmd)
+
+	args := []string{
+		"-version",
+	}
+
+	require.NoError(t, flags.Parse(f, args, "0.0.0", exit))
+	require.True(t, exitCall)
+}
+
+func TestInvalidFlag(t *testing.T) {
+	f := flag.NewFlagSet("testing", flag.ContinueOnError)
+	f.SetOutput(io.Discard)
+	cmd := new(config.AzureSettings)
+	flags.Add(f, cmd)
+
+	args := []string{
+		"-invalid",
+	}
+
+	require.Error(t, flags.Parse(f, args, "0.0.0", os.Exit))
+}
 
 func TestFlagsSet(t *testing.T) {
 	f := flag.NewFlagSet("testing", flag.ContinueOnError)
@@ -35,14 +66,14 @@ func TestFlagsSet(t *testing.T) {
 		"configFile",
 		"tenantId",
 		"connectionString",
-		"allowedLocalTopicsList",
-		"allowedCloudMessageTypesList",
+		"passthroughTelemetryTopics",
+		"passthroughCommandTopic",
 		"sasTokenValidity",
 		"idScope",
 		"localAddress",
 		"localUsername",
 		"localPassword",
-		"cacert",
+		"caCert",
 		"cert",
 		"key",
 		"logFile",

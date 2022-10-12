@@ -166,35 +166,11 @@ golang.org/x/time (v0.0.0-20190308202827-9d24e82272b4)
 * Project: https://github.com/golang/time
 * Source:  https://github.com/golang/time/tree/9d24e82272b4f38b78bc8cff74fa936d31ccd8ef
 
-github.com/golang/protobuf (1.4.2)
-
-* License: BSD 3-Clause "New" or "Revised" License
-* Project: https://github.com/golang/protobuf
-* Source:  https://github.com/golang/protobuf/releases/tag/v1.4.2
-
-protocolbuffers/protobuf-go (1.25.1-0.20200805231151-a709e31e5d12)
-
-* License: Licensed under the BSD 3-Clause "New" or "Revised" License
-* Project: https://github.com/protocolbuffers/protobuf-go
-* Source:  https://github.com/protocolbuffers/protobuf-go
-
-github.com/jhump/protoreflect (1.8.2)
-
-* License: Apache-2.0 License
-* Project: https://github.com/jhump/protoreflect
-* Source:  https://github.com/jhump/protoreflect/releases/tag/v1.8.2
-
 github.com/google/go-cmp (v0.5.4)
 
 * License: Licensed under the BSD 3-Clause "New" or "Revised" License
 * Project: https://github.com/google/go-cmp
 * Source:  https://github.com/google/go-cmp/releases/tag/v0.5.4
-
-googleapis/go-genproto (0.0.0-20200526211855-cb27e3aa2013)
-
-* License: Apache-2.0 License
-* Project: https://github.com/googleapis/go-genproto
-* Source:  https://github.com/googleapis/go-genproto
 
 tevino/abool (2.0.1)
 

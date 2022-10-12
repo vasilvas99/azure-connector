@@ -13,40 +13,29 @@
 package command
 
 import (
-	"fmt"
-	"strings"
-
+	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/eclipse-kanto/azure-connector/config"
-	"github.com/eclipse-kanto/azure-connector/util"
 	"github.com/eclipse-kanto/suite-connector/connector"
-	"github.com/pkg/errors"
 )
 
 const commandPassthroughHandlerName = "command_passthrough_handler"
 
+// A simple command passthrough handler that forwards all cloud-to-device messages from Azure IoT Hub to local MQTT broker on a preconfigured topic.
 type commandPassthroughMessageHandler struct {
-	topics   []string
-	settings *config.AzureSettings
+	passthroughCommandTopic string
 }
 
 func (h *commandPassthroughMessageHandler) Init(settings *config.AzureSettings, connSettings *config.AzureConnectionSettings) error {
-	h.settings = settings
-	h.topics = strings.Split(settings.AllowedCloudMessageTypesList, ",")
+	h.passthroughCommandTopic = settings.PassthroughCommandTopic
 	return nil
 }
 
-// TODO: keep it generic!
 func (h *commandPassthroughMessageHandler) HandleMessage(msg *message.Message) ([]*message.Message, error) {
-	cloudMessage := MessageFromContext(msg)
-	if cloudMessage == nil {
-		return nil, errors.New("cannot deserialize cloud message")
-	}
-	if util.ContainsString(h.topics, cloudMessage.CommandName) {
-		msg.SetContext(connector.SetTopicToCtx(msg.Context(), cloudMessage.ApplicationID+"/"+cloudMessage.CommandName))
-		return []*message.Message{msg}, nil
-	}
-	return nil, fmt.Errorf("cloud command name '%s' is not supported", cloudMessage.CommandName)
+	msgID := watermill.NewUUID()
+	outgoingMessage := message.NewMessage(msgID, msg.Payload)
+	outgoingMessage.SetContext(connector.SetTopicToCtx(outgoingMessage.Context(), h.passthroughCommandTopic))
+	return []*message.Message{outgoingMessage}, nil
 }
 
 func (h *commandPassthroughMessageHandler) Name() string {
@@ -54,7 +43,7 @@ func (h *commandPassthroughMessageHandler) Name() string {
 }
 
 func (h *commandPassthroughMessageHandler) Topics() []string {
-	return h.topics
+	return []string{h.passthroughCommandTopic}
 }
 
 func init() {

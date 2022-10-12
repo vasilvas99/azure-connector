@@ -27,22 +27,19 @@ const (
 )
 
 type passthroughMessageHandler struct {
-	settings     *config.AzureSettings
-	connSettings *config.AzureConnectionSettings
-	localTopics  []string
+	connSettings               *config.AzureConnectionSettings
+	passthroughTelemetryTopics []string
 }
 
 func (h *passthroughMessageHandler) Init(settings *config.AzureSettings, connSettings *config.AzureConnectionSettings) error {
-	h.settings = settings
 	h.connSettings = connSettings
-	h.localTopics = strings.Split(settings.AllowedLocalTopicsList, ",")
+	h.passthroughTelemetryTopics = strings.Split(settings.PassthroughTelemetryTopics, ",")
 	return nil
 }
 
 func (h *passthroughMessageHandler) HandleMessage(msg *message.Message) ([]*message.Message, error) {
 	msgID := watermill.NewUUID()
 	outgoingMessage := message.NewMessage(msgID, msg.Payload)
-	// TODO: Not Azure generic, abstraction is needed
 	outgoingTopic := routing.CreateTelemetryTopic(h.connSettings.DeviceID, msgID)
 	outgoingMessage.SetContext(connector.SetTopicToCtx(outgoingMessage.Context(), outgoingTopic))
 	return []*message.Message{outgoingMessage}, nil
@@ -53,7 +50,7 @@ func (h *passthroughMessageHandler) Name() string {
 }
 
 func (h *passthroughMessageHandler) Topics() []string {
-	return h.localTopics
+	return h.passthroughTelemetryTopics
 }
 
 func init() {

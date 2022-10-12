@@ -13,19 +13,15 @@
 package bus
 
 import (
-	"encoding/json"
 	"fmt"
 
+	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/eclipse-kanto/suite-connector/connector"
-	"github.com/pkg/errors"
 
 	"github.com/eclipse-kanto/azure-connector/config"
 	"github.com/eclipse-kanto/azure-connector/routing"
-	routingmessage "github.com/eclipse-kanto/azure-connector/routing/message"
-	"github.com/eclipse-kanto/azure-connector/routing/message/handlers/command"
 	handlers "github.com/eclipse-kanto/azure-connector/routing/message/handlers/common"
-	"github.com/eclipse-kanto/azure-connector/util"
 )
 
 const (
@@ -33,6 +29,7 @@ const (
 )
 
 type commandBusHandler struct {
+	logger          watermill.LoggerAdapter
 	commandHandlers []handlers.MessageHandler
 }
 
@@ -46,7 +43,9 @@ func CommandBus(router *message.Router,
 ) {
 	//Azure IoT Hub -> Message bus -> Mosquitto Broker -> Gateway
 	initCommandHandlers := []handlers.MessageHandler{}
-	commandBusHandler := &commandBusHandler{}
+	commandBusHandler := &commandBusHandler{
+		logger: router.Logger(),
+	}
 	for _, commandHandler := range commandHandlers {
 		if err := commandHandler.Init(settings, connSettings); err != nil {
 			continue
@@ -64,15 +63,13 @@ func CommandBus(router *message.Router,
 }
 
 func (h *commandBusHandler) HandleMessage(msg *message.Message) ([]*message.Message, error) {
-	cloudMessage := &routingmessage.CloudMessage{}
-	if err := json.Unmarshal(msg.Payload, cloudMessage); err != nil {
-		return nil, errors.Wrap(err, "cannot deserialize cloud message")
-	}
-	msg.SetContext(command.SetMessageToContext(msg, cloudMessage))
 	for _, commandHandler := range h.commandHandlers {
-		if util.ContainsString(commandHandler.Topics(), cloudMessage.CommandName) {
-			return commandHandler.HandleMessage(msg)
+		msg, err := commandHandler.HandleMessage(msg)
+		if err == nil {
+			return msg, nil
 		}
+		h.logger.Error("error handling command message", err, nil)
 	}
-	return nil, fmt.Errorf("no message handler for command name '%s'", cloudMessage.CommandName)
+	return nil, fmt.Errorf("cannot handle command message '%v'", string(msg.Payload))
+
 }
