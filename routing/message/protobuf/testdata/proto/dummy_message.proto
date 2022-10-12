@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-package test.proto;
-
-message DummyMessage {
-
-	string value = 1;
-
-}
