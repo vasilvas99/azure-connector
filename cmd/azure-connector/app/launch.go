@@ -30,8 +30,7 @@ import (
 	azurecfg "github.com/eclipse-kanto/azure-connector/config"
 	azurerouting "github.com/eclipse-kanto/azure-connector/routing"
 	routingbus "github.com/eclipse-kanto/azure-connector/routing/bus"
-	command "github.com/eclipse-kanto/azure-connector/routing/message/handlers/command"
-	telemetry "github.com/eclipse-kanto/azure-connector/routing/message/handlers/telemetry"
+	"github.com/eclipse-kanto/azure-connector/routing/message/handlers"
 )
 
 func startRouter(
@@ -39,6 +38,8 @@ func startRouter(
 	settings *azurecfg.AzureSettings,
 	connSettings *azurecfg.AzureConnectionSettings,
 	statusPub message.Publisher,
+	telemetryHandlers []handlers.MessageHandler,
+	commandHandlers []handlers.MessageHandler,
 	done chan bool,
 	logger logger.Logger,
 ) (*message.Router, error) {
@@ -70,11 +71,9 @@ func startRouter(
 	azureSub := connector.NewSubscriber(azureClient, connector.QosAtMostOnce, false, logger, nil)
 	mosquittoSub := connector.NewSubscriber(cloudClient, connector.QosAtLeastOnce, false, router.Logger(), nil)
 
-	telemetryHandlers := telemetry.MessageHandlers()
 	routingbus.TelemetryBus(router, azurePub, mosquittoSub, settings, connSettings, telemetryHandlers)
 
 	cloudPub := connector.NewPublisher(cloudClient, connector.QosAtLeastOnce, router.Logger(), nil)
-	commandHandlers := command.MessageHandlers()
 	routingbus.CommandBus(router, cloudPub, azureSub, settings, connSettings, commandHandlers)
 
 	go func() {
@@ -164,7 +163,7 @@ func startRouter(
 }
 
 // MainLoop is the main loop of the application
-func MainLoop(settings *azurecfg.AzureSettings, log logger.Logger, idScopeProvider azurecfg.IDScopeProvider) error {
+func MainLoop(settings *azurecfg.AzureSettings, log logger.Logger, idScopeProvider azurecfg.IDScopeProvider, telemetryHandlers []handlers.MessageHandler, commandHandlers []handlers.MessageHandler) error {
 	localClient, err := config.CreateLocalConnection(&settings.LocalConnectionSettings, log)
 	if err != nil {
 		return errors.Wrap(err, "cannot create mosquitto connection")
@@ -183,7 +182,7 @@ func MainLoop(settings *azurecfg.AzureSettings, log logger.Logger, idScopeProvid
 	}
 
 	done := make(chan bool, 1)
-	azureRouter, err := startRouter(localClient, settings, connSettings, statusPub, done, log)
+	azureRouter, err := startRouter(localClient, settings, connSettings, statusPub, telemetryHandlers, commandHandlers, done, log)
 	if err != nil {
 		log.Error("Failed to create message bus", err, nil)
 	}

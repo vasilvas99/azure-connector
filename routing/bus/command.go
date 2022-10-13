@@ -21,7 +21,7 @@ import (
 
 	"github.com/eclipse-kanto/azure-connector/config"
 	"github.com/eclipse-kanto/azure-connector/routing"
-	handlers "github.com/eclipse-kanto/azure-connector/routing/message/handlers/common"
+	"github.com/eclipse-kanto/azure-connector/routing/message/handlers"
 )
 
 const (
@@ -48,6 +48,8 @@ func CommandBus(router *message.Router,
 	}
 	for _, commandHandler := range commandHandlers {
 		if err := commandHandler.Init(settings, connSettings); err != nil {
+			logFields := watermill.LogFields{"handler_name": commandHandler.Name()}
+			router.Logger().Error("skipping command handler that cannot be initialized", err, logFields)
 			continue
 		}
 		initCommandHandlers = append(initCommandHandlers, commandHandler)
@@ -68,7 +70,8 @@ func (h *commandBusHandler) HandleMessage(msg *message.Message) ([]*message.Mess
 		if err == nil {
 			return msg, nil
 		}
-		h.logger.Error("error handling command message", err, nil)
+		logFields := watermill.LogFields{"handler_name": commandHandler.Name()}
+		h.logger.Error("error handling command message", err, logFields)
 	}
 	return nil, fmt.Errorf("cannot handle command message '%v'", string(msg.Payload))
 

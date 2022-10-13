@@ -19,7 +19,7 @@ import (
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/eclipse-kanto/azure-connector/config"
-	handlers "github.com/eclipse-kanto/azure-connector/routing/message/handlers/common"
+	"github.com/eclipse-kanto/azure-connector/routing/message/handlers"
 
 	"github.com/stretchr/testify/assert"
 )

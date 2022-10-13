@@ -20,7 +20,6 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
 
-	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/eclipse-kanto/suite-connector/config"
 	"github.com/eclipse-kanto/suite-connector/logger"
 
@@ -28,18 +27,14 @@ import (
 
 	"github.com/eclipse-kanto/azure-connector/cmd/azure-connector/app"
 	azurecfg "github.com/eclipse-kanto/azure-connector/config"
+
+	"github.com/eclipse-kanto/azure-connector/routing/message/handlers"
+	"github.com/eclipse-kanto/azure-connector/routing/message/handlers/passthrough"
 )
 
 var (
 	version = "development"
 )
-
-func stopRouter(router *message.Router, done <-chan bool) {
-	if router != nil {
-		router.Close()
-		<-done
-	}
-}
 
 func main() {
 	f := flag.NewFlagSet("azure-connector", flag.ContinueOnError)
@@ -76,11 +71,19 @@ func main() {
 	logger.Infof("Starting azure connector %s", version)
 	flags.ConfigCheck(logger, *fConfigFile)
 
-	if err := app.MainLoop(settings, logger, nil); err != nil {
+	if err := app.MainLoop(settings, logger, nil, telemetryHandlers(), commandHandlers()); err != nil {
 		logger.Error("Init failure", err, nil)
 
 		loggerOut.Close()
 
 		os.Exit(1)
 	}
+}
+
+func telemetryHandlers() []handlers.MessageHandler {
+	return []handlers.MessageHandler{passthrough.CreateTelemetryHandler()}
+}
+
+func commandHandlers() []handlers.MessageHandler {
+	return []handlers.MessageHandler{passthrough.CreateCommandHandler()}
 }

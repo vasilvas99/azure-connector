@@ -27,7 +27,7 @@ import (
 	"github.com/eclipse-kanto/azure-connector/util"
 
 	test "github.com/eclipse-kanto/azure-connector/routing/bus/internal/testing"
-	handlers "github.com/eclipse-kanto/azure-connector/routing/message/handlers/common"
+	"github.com/eclipse-kanto/azure-connector/routing/message/handlers"
 
 	conn "github.com/eclipse-kanto/suite-connector/connector"
 	"github.com/eclipse-kanto/suite-connector/logger"

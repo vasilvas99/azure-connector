@@ -10,7 +10,7 @@
 //
 // SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 
-package command
+package passthrough
 
 import (
 	"io"
@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestPassthroughMessageHandler(t *testing.T) {
+func TestCreateCommandHandler(t *testing.T) {
 	settings := &config.AzureSettings{
 		ConnectionString:        "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
 		PassthroughCommandTopic: "testCommand",
@@ -34,31 +34,29 @@ func TestPassthroughMessageHandler(t *testing.T) {
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
 	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
 	require.NoError(t, err)
-	messageHandler := &commandPassthroughMessageHandler{}
+	messageHandler := CreateCommandHandler()
 
 	require.NoError(t, messageHandler.Init(settings, connSettings))
-	assert.Equal(t, messageHandler.passthroughCommandTopic, settings.PassthroughCommandTopic)
-	assert.Equal(t, commandPassthroughHandlerName, messageHandler.Name())
+	assert.Equal(t, commandHandlerName, messageHandler.Name())
 	assert.Equal(t, []string{settings.PassthroughCommandTopic}, messageHandler.Topics())
 }
 
 func TestHandleCommand(t *testing.T) {
-	settings := &config.AzureSettings{
-		ConnectionString:        "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
-		PassthroughCommandTopic: "testCommand",
-	}
-	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
-	require.NoError(t, err)
-	messageHandler := &commandPassthroughMessageHandler{}
-	require.NoError(t, messageHandler.Init(settings, connSettings))
+	topic := "command-topic"
+	payload := "dummy_payload"
 
-	azureMessages, err := messageHandler.HandleMessage(&message.Message{Payload: []byte("dummy_payload")})
+	settings := &config.AzureSettings{
+		PassthroughCommandTopic: topic,
+	}
+	messageHandler := CreateCommandHandler()
+	require.NoError(t, messageHandler.Init(settings, nil))
+
+	azureMessages, err := messageHandler.HandleMessage(&message.Message{Payload: []byte(payload)})
 	require.NoError(t, err)
 
 	azureMsg := azureMessages[0]
 	azureMsgTopic, _ := connector.TopicFromCtx(azureMsg.Context())
 
-	assert.Equal(t, "testCommand", azureMsgTopic)
-	assert.Equal(t, "dummy_payload", string(azureMsg.Payload))
+	assert.Equal(t, topic, azureMsgTopic)
+	assert.Equal(t, payload, string(azureMsg.Payload))
 }
