@@ -17,10 +17,20 @@ import (
 	"github.com/eclipse-kanto/azure-connector/config"
 )
 
-// MessageHandler represents the internal interface for implementing a Watermill message handler.
-type MessageHandler interface {
-	Init(settings *config.AzureSettings, connSettings *config.AzureConnectionSettings) error
+// messageHandler represents the internal interface for implementing a message handler.
+type messageHandler interface {
+	Init(connInfo *config.RemoteConnectionInfo) error
 	HandleMessage(message *message.Message) ([]*message.Message, error)
 	Name() string
-	Topics() []string
+}
+
+// CommandHandler interface allows pluggability for handlers for cloud-to-device messages from Azure IoT Hub.
+type CommandHandler interface {
+	messageHandler
+}
+
+// TelemetryHandler interface allows pluggability for handlers for device-to-cloud messages to Azure IoT Hub.
+type TelemetryHandler interface {
+	messageHandler
+	Topics() string
 }

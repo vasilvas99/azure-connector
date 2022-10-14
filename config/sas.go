@@ -39,35 +39,28 @@ type SharedAccessSignature struct {
 	Sr  string
 	Sig string
 	Se  time.Time
-	Skn string
 }
 
 // GenerateSASToken generates the SAS token for device authentication.
 func GenerateSASToken(connSettings *AzureConnectionSettings) *SharedAccessSignature {
 	return newSharedAccessSignature(connSettings.HostName,
-		connSettings.SharedAccessKeyName,
-		connSettings.SharedAccessKey.SharedAccessKeyDecoded,
+		connSettings.SharedAccessKey,
 		Now().Add(connSettings.TokenValidity))
 }
 
 func sasTokenToString(sas *SharedAccessSignature) string {
-	s := "SharedAccessSignature " +
+	return "SharedAccessSignature " +
 		"sr=" + url.QueryEscape(sas.Sr) +
 		"&sig=" + url.QueryEscape(sas.Sig) +
 		"&se=" + url.QueryEscape(strconv.FormatInt(sas.Se.Unix(), 10))
-	if sas.Skn != "" {
-		s += "&skn=" + url.QueryEscape(sas.Skn)
-	}
-	return s
 }
 
-func newSharedAccessSignature(resource, policy string, decodedKey []byte, expiry time.Time) *SharedAccessSignature {
+func newSharedAccessSignature(resource string, decodedKey []byte, expiry time.Time) *SharedAccessSignature {
 	sig := messageKeySignature(resource, decodedKey, expiry)
 	return &SharedAccessSignature{
 		Sr:  resource,
 		Sig: sig,
 		Se:  expiry,
-		Skn: policy,
 	}
 }
 

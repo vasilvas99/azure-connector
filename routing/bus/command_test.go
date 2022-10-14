@@ -14,21 +14,17 @@ package bus
 
 import (
 	"errors"
-	"io"
-	"log"
 	"reflect"
 	"testing"
 
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 
-	"github.com/eclipse-kanto/azure-connector/config"
 	"github.com/eclipse-kanto/azure-connector/routing"
 	test "github.com/eclipse-kanto/azure-connector/routing/bus/internal/testing"
 	"github.com/eclipse-kanto/azure-connector/routing/message/handlers"
 
 	conn "github.com/eclipse-kanto/suite-connector/connector"
-	"github.com/eclipse-kanto/suite-connector/logger"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -41,15 +37,10 @@ const (
 )
 
 func TestRegisterCommandMessageHandler(t *testing.T) {
-	settings := &config.AzureSettings{
-		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
-	}
-	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
-	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
+	router, connInfo := setupTestRouter("dummy-device")
 
-	commandHandlers := []handlers.MessageHandler{}
-	CommandBus(router, conn.NullPublisher(), test.NewDummySubscriber(), settings, connSettings, commandHandlers)
+	commandHandlers := []handlers.CommandHandler{}
+	CommandBus(router, conn.NullPublisher(), test.NewDummySubscriber(), connInfo, commandHandlers)
 	refRouterPtr := reflect.ValueOf(router)
 	refRouter := reflect.Indirect(refRouterPtr)
 	refHandlers := refRouter.FieldByName(fieldHandlers)
@@ -59,16 +50,11 @@ func TestRegisterCommandMessageHandler(t *testing.T) {
 }
 
 func TestRegisterCommandMessageHandlerInitializationError(t *testing.T) {
-	settings := &config.AzureSettings{
-		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
-	}
-	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
-	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
+	router, connInfo := setupTestRouter("dummy-device")
 
-	commandHandler := test.NewDummyMessageHandler(testCommandHandlerName, []string{commandName}, errors.New(""))
-	commandHandlers := []handlers.MessageHandler{commandHandler}
-	CommandBus(router, conn.NullPublisher(), test.NewDummySubscriber(), settings, connSettings, commandHandlers)
+	commandHandler := test.NewDummyCommandHandler(testCommandHandlerName, errors.New(""), nil)
+	commandHandlers := []handlers.CommandHandler{commandHandler}
+	CommandBus(router, conn.NullPublisher(), test.NewDummySubscriber(), connInfo, commandHandlers)
 	refRouterPtr := reflect.ValueOf(router)
 	refRouter := reflect.Indirect(refRouterPtr)
 	refHandlers := refRouter.FieldByName(fieldHandlers)
@@ -92,10 +78,10 @@ func TestNoCommandHandlerForMessage(t *testing.T) {
 }
 
 func TestFirstValidCommandMessageHandler(t *testing.T) {
-	commandHandler1 := test.NewDummyFailureHandler(testCommandHandlerName+"_1", nil, errors.New(""))
-	commandHandler2 := test.NewDummyMessageHandler(testCommandHandlerName+"_2", nil, nil)
-	commandHandler3 := test.NewDummyFailureHandler(testCommandHandlerName+"_3", nil, errors.New(""))
-	commandHandlers := []handlers.MessageHandler{commandHandler1, commandHandler2, commandHandler3}
+	commandHandler1 := test.NewDummyCommandHandler(testCommandHandlerName+"_1", nil, errors.New(""))
+	commandHandler2 := test.NewDummyCommandHandler(testCommandHandlerName+"_2", nil, nil)
+	commandHandler3 := test.NewDummyCommandHandler(testCommandHandlerName+"_3", nil, errors.New(""))
+	commandHandlers := []handlers.CommandHandler{commandHandler1, commandHandler2, commandHandler3}
 
 	busHandler := &commandBusHandler{logger: watermill.NopLogger{}, commandHandlers: commandHandlers}
 
@@ -107,10 +93,10 @@ func TestFirstValidCommandMessageHandler(t *testing.T) {
 }
 
 func TestMultipleCommandMessageHandlers(t *testing.T) {
-	commandHandler1 := test.NewDummyMessageHandler(testCommandHandlerName+"_1", nil, nil)
-	commandHandler2 := test.NewDummyMessageHandler(testCommandHandlerName+"_2", nil, nil)
-	commandHandler3 := test.NewDummyMessageHandler(testCommandHandlerName+"_3", nil, nil)
-	commandHandlers := []handlers.MessageHandler{commandHandler1, commandHandler2, commandHandler3}
+	commandHandler1 := test.NewDummyCommandHandler(testCommandHandlerName+"_1", nil, nil)
+	commandHandler2 := test.NewDummyCommandHandler(testCommandHandlerName+"_2", nil, nil)
+	commandHandler3 := test.NewDummyCommandHandler(testCommandHandlerName+"_3", nil, nil)
+	commandHandlers := []handlers.CommandHandler{commandHandler1, commandHandler2, commandHandler3}
 
 	busHandler := &commandBusHandler{logger: watermill.NopLogger{}, commandHandlers: commandHandlers}
 

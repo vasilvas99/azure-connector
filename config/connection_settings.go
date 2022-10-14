@@ -30,30 +30,29 @@ import (
 )
 
 const (
-	provisioningJSONConfig         = "provisioning.json" // TODO: why with the same name as default flag value?
-	hostNameSuffix                 = ".azure-devices.net"
-	propertyKeyHostName            = "HostName"
-	propertyKeyDeviceID            = "DeviceId"
-	propertyKeySharedAccessKey     = "SharedAccessKey"
-	propertyKeySharedAccessKeyName = "SharedAccessKeyName"
+	provisioningJSONConfig     = "provisioning.json"
+	hostNameSuffix             = ".azure-devices.net"
+	propertyKeyHostName        = "HostName"
+	propertyKeyDeviceID        = "DeviceId"
+	propertyKeySharedAccessKey = "SharedAccessKey"
 )
 
-// SharedAccessKey contains the shared access key for generating SAS token for device authentication.
-type SharedAccessKey struct {
-	SharedAccessKeyName    string
-	SharedAccessKeyDecoded []byte
+// RemoteConnectionInfo contains properties related to the remote connection that may not be known at the start of the connector.
+type RemoteConnectionInfo struct {
+	HubName  string
+	HostName string
+	DeviceID string
 }
 
 // AzureConnectionSettings contains the configuration data for establishing connection to the Azure IoT Hub.
 type AzureConnectionSettings struct {
-	HubName       string
-	HostName      string
-	DeviceID      string
+	RemoteConnectionInfo
+
 	DeviceCert    string
 	DeviceKey     string
 	TokenValidity time.Duration
 
-	*SharedAccessKey
+	SharedAccessKey []byte
 }
 
 // PrepareAzureConnectionSettings prepares the configuration data for establishing connection to the Azure IoT Hub, allowing usage of IDScopeProvider.
@@ -214,10 +213,7 @@ func CreateAzureSASTokenConnectionSettings(
 	if sharedAccessKeyDecoded, err = base64.StdEncoding.DecodeString(sharedAccessKey); err != nil {
 		return nil, errors.New("the SharedAccessKey is not base64 encoded")
 	}
-	connSettings.SharedAccessKey = &SharedAccessKey{
-		SharedAccessKeyName:    connStringProperties[propertyKeySharedAccessKeyName],
-		SharedAccessKeyDecoded: sharedAccessKeyDecoded,
-	}
+	connSettings.SharedAccessKey = sharedAccessKeyDecoded
 
 	if tokenValidity, err := ParseSASTokenValidity(settings.SASTokenValidity); err != nil {
 		logger.Warn("The default SAS token validity period will be set.", err, nil)
@@ -262,7 +258,6 @@ func attachCertificateInfo(connSettings *AzureConnectionSettings, certFileReader
 			return err
 		}
 	}
-
 	return nil
 }
 

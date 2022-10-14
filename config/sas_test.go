@@ -39,7 +39,6 @@ func TestGenerateSASToken(t *testing.T) {
 
 	sasToken := config.GenerateSASToken(connSettings)
 
-	assert.Equal(t, "", sasToken.Skn)
 	assert.Equal(t, "dummy-hub.azure-devices.net", sasToken.Sr)
 	assert.Equal(t, "2021-01-01 01:00:00 +0000 UTC", sasToken.Se.String())
 	assert.Equal(t, "ifZm2I0YKRkwc8Pc49e0qKSsu3l3FbxoWZRqGBtXtng=", sasToken.Sig)

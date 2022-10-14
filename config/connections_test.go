@@ -31,15 +31,15 @@ func TestCreateAzureClientNoCacert(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
 	decodedAccessKey, _ := base64.StdEncoding.DecodeString("x7HrdC+URzEneFam9ZKa0Ke7nvsDwiuJptzFkgs8JWA=")
-	accessKey := &config.SharedAccessKey{
-		SharedAccessKeyDecoded: decodedAccessKey,
-	}
+
 	settings := &config.AzureSettings{}
 	connSettings := &config.AzureConnectionSettings{
-		DeviceID:        "dummy-device",
-		HostName:        "dummy-hub.azure-devices.net",
-		HubName:         "dummy-hub",
-		SharedAccessKey: accessKey,
+		RemoteConnectionInfo: config.RemoteConnectionInfo{
+			DeviceID: "dummy-device",
+			HostName: "dummy-hub.azure-devices.net",
+			HubName:  "dummy-hub",
+		},
+		SharedAccessKey: decodedAccessKey,
 	}
 
 	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)

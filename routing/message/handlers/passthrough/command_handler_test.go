@@ -13,13 +13,9 @@
 package passthrough
 
 import (
-	"io"
-	"log"
 	"testing"
 
-	"github.com/eclipse-kanto/azure-connector/config"
 	"github.com/eclipse-kanto/suite-connector/connector"
-	"github.com/eclipse-kanto/suite-connector/logger"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/stretchr/testify/assert"
@@ -27,33 +23,21 @@ import (
 )
 
 func TestCreateCommandHandler(t *testing.T) {
-	settings := &config.AzureSettings{
-		ConnectionString:        "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
-		PassthroughCommandTopic: "testCommand",
-	}
-	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, err := config.PrepareAzureConnectionSettings(settings, nil, logger)
-	require.NoError(t, err)
-	messageHandler := CreateCommandHandler()
-
-	require.NoError(t, messageHandler.Init(settings, connSettings))
+	messageHandler := CreateCommandHandler("command-topic")
+	require.NoError(t, messageHandler.Init(nil))
 	assert.Equal(t, commandHandlerName, messageHandler.Name())
-	assert.Equal(t, []string{settings.PassthroughCommandTopic}, messageHandler.Topics())
 }
 
 func TestHandleCommand(t *testing.T) {
 	topic := "command-topic"
+	messageHandler := CreateCommandHandler(topic)
+	require.NoError(t, messageHandler.Init(nil))
+
 	payload := "dummy_payload"
-
-	settings := &config.AzureSettings{
-		PassthroughCommandTopic: topic,
-	}
-	messageHandler := CreateCommandHandler()
-	require.NoError(t, messageHandler.Init(settings, nil))
-
 	azureMessages, err := messageHandler.HandleMessage(&message.Message{Payload: []byte(payload)})
 	require.NoError(t, err)
 
+	assert.Equal(t, 1, len(azureMessages))
 	azureMsg := azureMessages[0]
 	azureMsgTopic, _ := connector.TopicFromCtx(azureMsg.Context())
 

@@ -38,8 +38,8 @@ func startRouter(
 	settings *azurecfg.AzureSettings,
 	connSettings *azurecfg.AzureConnectionSettings,
 	statusPub message.Publisher,
-	telemetryHandlers []handlers.MessageHandler,
-	commandHandlers []handlers.MessageHandler,
+	telemetryHandlers []handlers.TelemetryHandler,
+	commandHandlers []handlers.CommandHandler,
 	done chan bool,
 	logger logger.Logger,
 ) (*message.Router, error) {
@@ -71,10 +71,10 @@ func startRouter(
 	azureSub := connector.NewSubscriber(azureClient, connector.QosAtMostOnce, false, logger, nil)
 	mosquittoSub := connector.NewSubscriber(cloudClient, connector.QosAtLeastOnce, false, router.Logger(), nil)
 
-	routingbus.TelemetryBus(router, azurePub, mosquittoSub, settings, connSettings, telemetryHandlers)
+	routingbus.TelemetryBus(router, azurePub, mosquittoSub, &connSettings.RemoteConnectionInfo, telemetryHandlers)
 
 	cloudPub := connector.NewPublisher(cloudClient, connector.QosAtLeastOnce, router.Logger(), nil)
-	routingbus.CommandBus(router, cloudPub, azureSub, settings, connSettings, commandHandlers)
+	routingbus.CommandBus(router, cloudPub, azureSub, &connSettings.RemoteConnectionInfo, commandHandlers)
 
 	go func() {
 		ctx, cancel := context.WithCancel(context.Background())
@@ -163,7 +163,7 @@ func startRouter(
 }
 
 // MainLoop is the main loop of the application
-func MainLoop(settings *azurecfg.AzureSettings, log logger.Logger, idScopeProvider azurecfg.IDScopeProvider, telemetryHandlers []handlers.MessageHandler, commandHandlers []handlers.MessageHandler) error {
+func MainLoop(settings *azurecfg.AzureSettings, log logger.Logger, idScopeProvider azurecfg.IDScopeProvider, telemetryHandlers []handlers.TelemetryHandler, commandHandlers []handlers.CommandHandler) error {
 	localClient, err := config.CreateLocalConnection(&settings.LocalConnectionSettings, log)
 	if err != nil {
 		return errors.Wrap(err, "cannot create mosquitto connection")

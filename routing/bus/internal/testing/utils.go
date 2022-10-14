@@ -48,12 +48,12 @@ func NewDummySubscriber() message.Subscriber {
 
 type dummyMessageHandler struct {
 	handleName string
-	topics     []string
+	topics     string
 	initErr    error
 	handleErr  error
 }
 
-func (h *dummyMessageHandler) Init(settings *config.AzureSettings, connSettings *config.AzureConnectionSettings) error {
+func (h *dummyMessageHandler) Init(connInfo *config.RemoteConnectionInfo) error {
 	return h.initErr
 }
 
@@ -69,25 +69,25 @@ func (h *dummyMessageHandler) Name() string {
 	return h.handleName
 }
 
-func (h *dummyMessageHandler) Topics() []string {
+func (h *dummyMessageHandler) Topics() string {
 	return h.topics
 }
 
-// NewDummyMessageHandler instantiates a new dummy Watermill message handler.
-func NewDummyMessageHandler(handlerName string, topics []string, initErr error) handlers.MessageHandler {
+// NewDummyCommandHandler instantiates a new dummy command handler.
+func NewDummyCommandHandler(handlerName string, initErr error, handleErr error) handlers.CommandHandler {
 	return &dummyMessageHandler{
 		handleName: handlerName,
-		topics:     topics,
 		initErr:    initErr,
+		handleErr:  handleErr,
 	}
 }
 
-// NewDummyFailureHandler instantiates a new dummy Watermill message handler that can return error on message handling.
-func NewDummyFailureHandler(handlerName string, topics []string, handleErr error) handlers.MessageHandler {
+// NewDummyTelemetryHandler instantiates a new dummy telemetry handler.
+func NewDummyTelemetryHandler(handlerName string, topic string, initErr error) handlers.TelemetryHandler {
 	return &dummyMessageHandler{
 		handleName: handlerName,
-		topics:     topics,
-		handleErr:  handleErr,
+		topics:     topic,
+		initErr:    initErr,
 	}
 }
 

@@ -13,8 +13,6 @@
 package bus
 
 import (
-	"io"
-	"log"
 	"reflect"
 	"testing"
 
@@ -30,7 +28,6 @@ import (
 	"github.com/eclipse-kanto/azure-connector/routing/message/handlers"
 
 	conn "github.com/eclipse-kanto/suite-connector/connector"
-	"github.com/eclipse-kanto/suite-connector/logger"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -41,43 +38,28 @@ const (
 )
 
 func TestNoTelemetryMessageHandlers(t *testing.T) {
-	settings := &config.AzureSettings{
-		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
-	}
-	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
-	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
+	router, connInfo := setupTestRouter("dummy-device")
 
-	telemetryHandlers := []handlers.MessageHandler{}
-	TelemetryBus(router, conn.NullPublisher(), test.NewDummySubscriber(), settings, connSettings, telemetryHandlers)
+	telemetryHandlers := []handlers.TelemetryHandler{}
+	TelemetryBus(router, conn.NullPublisher(), test.NewDummySubscriber(), connInfo, telemetryHandlers)
 	test.AssertNoRouterHandlers(t, router)
 }
 
 func TestTelemetryMessageHandlerWithoutTopics(t *testing.T) {
-	settings := &config.AzureSettings{
-		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
-	}
-	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
-	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
+	router, connInfo := setupTestRouter("dummy-device")
 
-	telemetryHandler := test.NewDummyMessageHandler(testTelemetryHandlerName, []string{}, nil)
-	telemetryHandlers := []handlers.MessageHandler{telemetryHandler}
-	TelemetryBus(router, conn.NullPublisher(), test.NewDummySubscriber(), settings, connSettings, telemetryHandlers)
+	telemetryHandler := test.NewDummyTelemetryHandler(testTelemetryHandlerName, "", nil)
+	telemetryHandlers := []handlers.TelemetryHandler{telemetryHandler}
+	TelemetryBus(router, conn.NullPublisher(), test.NewDummySubscriber(), connInfo, telemetryHandlers)
 	test.AssertNoRouterHandlers(t, router)
 }
 
 func TestSingleTelemetryMessageHandler(t *testing.T) {
-	settings := &config.AzureSettings{
-		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
-	}
-	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
-	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
+	router, connInfo := setupTestRouter("dummy-device")
 
-	telemetryHandler := test.NewDummyMessageHandler(testTelemetryHandlerName, []string{"telemetry/#"}, nil)
-	telemetryHandlers := []handlers.MessageHandler{telemetryHandler}
-	TelemetryBus(router, conn.NullPublisher(), test.NewDummySubscriber(), settings, connSettings, telemetryHandlers)
+	telemetryHandler := test.NewDummyTelemetryHandler(testTelemetryHandlerName, "telemetry/#", nil)
+	telemetryHandlers := []handlers.TelemetryHandler{telemetryHandler}
+	TelemetryBus(router, conn.NullPublisher(), test.NewDummySubscriber(), connInfo, telemetryHandlers)
 	refRouterPtr := reflect.ValueOf(router)
 	refRouter := reflect.Indirect(refRouterPtr)
 	refHandlers := refRouter.FieldByName(fieldHandlers)
@@ -87,19 +69,14 @@ func TestSingleTelemetryMessageHandler(t *testing.T) {
 }
 
 func TestMultipleTelemetryMessageHandlers(t *testing.T) {
-	settings := &config.AzureSettings{
-		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
-	}
-	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
-	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
+	router, connInfo := setupTestRouter("dummy-device")
 
 	handlerNames := []string{"test_handler_1", "test_handler_2", "test_handler_3"}
-	var telemetryHandlers []handlers.MessageHandler
+	var telemetryHandlers []handlers.TelemetryHandler
 	for _, handlerName := range handlerNames {
-		telemetryHandlers = append(telemetryHandlers, test.NewDummyMessageHandler(handlerName, []string{"telemetry/#"}, nil))
+		telemetryHandlers = append(telemetryHandlers, test.NewDummyTelemetryHandler(handlerName, "telemetry/#", nil))
 	}
-	TelemetryBus(router, conn.NullPublisher(), test.NewDummySubscriber(), settings, connSettings, telemetryHandlers)
+	TelemetryBus(router, conn.NullPublisher(), test.NewDummySubscriber(), connInfo, telemetryHandlers)
 	refRouterPtr := reflect.ValueOf(router)
 	refRouter := reflect.Indirect(refRouterPtr)
 	refHandlers := refRouter.FieldByName(fieldHandlers)
@@ -113,15 +90,18 @@ func TestMultipleTelemetryMessageHandlers(t *testing.T) {
 }
 
 func TestTelemetryMessageHandlerInitializationError(t *testing.T) {
-	settings := &config.AzureSettings{
-		ConnectionString: "HostName=dummy-hub.azure-devices.net;DeviceId=dummy-device;SharedAccessKey=dGVzdGF6dXJlc2hhcmVkYWNjZXNza2V5",
-	}
-	logger := logger.NewLogger(log.New(io.Discard, "", log.Ldate), logger.INFO)
-	connSettings, _ := config.PrepareAzureConnectionSettings(settings, nil, logger)
-	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
+	router, connInfo := setupTestRouter("dummy-device")
 
-	telemetryHandler := test.NewDummyMessageHandler(testTelemetryHandlerName, []string{"telemetry/#"}, errors.New("init error"))
-	telemetryHandlers := []handlers.MessageHandler{telemetryHandler}
-	TelemetryBus(router, conn.NullPublisher(), test.NewDummySubscriber(), settings, connSettings, telemetryHandlers)
+	telemetryHandler := test.NewDummyTelemetryHandler(testTelemetryHandlerName, "telemetry/#", errors.New("init error"))
+	telemetryHandlers := []handlers.TelemetryHandler{telemetryHandler}
+	TelemetryBus(router, conn.NullPublisher(), test.NewDummySubscriber(), connInfo, telemetryHandlers)
 	test.AssertNoRouterHandlers(t, router)
+}
+
+func setupTestRouter(deviceID string) (*message.Router, *config.RemoteConnectionInfo) {
+	connInfo := &config.RemoteConnectionInfo{
+		DeviceID: deviceID,
+	}
+	router, _ := message.NewRouter(message.RouterConfig{}, watermill.NopLogger{})
+	return router, connInfo
 }

@@ -13,44 +13,36 @@
 package passthrough
 
 import (
+	"strings"
 	"testing"
 
-	"github.com/eclipse-kanto/azure-connector/config"
-	"github.com/eclipse-kanto/azure-connector/routing/message/handlers"
-
 	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/eclipse-kanto/azure-connector/config"
+	"github.com/eclipse-kanto/suite-connector/connector"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateTelemetryHandler(t *testing.T) {
 	topic := "localTopic1,localTopic2,localTopic3"
-	deviceID := "dummy-device"
-	messageHandler := createTelemetryHandler(t, topic, deviceID)
+
+	messageHandler := CreateTelemetryHandler(topic)
 	assert.Equal(t, telemetryHandlerName, messageHandler.Name())
-	assert.Equal(t, []string{"localTopic1", "localTopic2", "localTopic3"}, messageHandler.Topics())
+	assert.Equal(t, topic, messageHandler.Topics())
 }
 
 func TestHandleTelemetryMessage(t *testing.T) {
-	topic := "test-telemetry"
-	deviceID := "dummy-device"
-	handler := createTelemetryHandler(t, topic, deviceID)
+	handler := CreateTelemetryHandler("telemetry_topic")
+	require.NoError(t, handler.Init(&config.RemoteConnectionInfo{DeviceID: "dummy_device"}))
+
 	payload := "dummy_message"
 	outgoingMessages, err := handler.HandleMessage(&message.Message{Payload: []byte(payload)})
 	require.NoError(t, err)
 	assert.NotNil(t, outgoingMessages)
 	assert.Equal(t, 1, len(outgoingMessages))
-	assert.Equal(t, payload, string(outgoingMessages[0].Payload))
-}
 
-func createTelemetryHandler(t *testing.T, topic string, deviceID string) handlers.MessageHandler {
-	settings := &config.AzureSettings{
-		PassthroughTelemetryTopics: topic,
-	}
-	connSettings := &config.AzureConnectionSettings{
-		DeviceID: deviceID,
-	}
-	messageHandler := CreateTelemetryHandler()
-	require.NoError(t, messageHandler.Init(settings, connSettings))
-	return messageHandler
+	message := outgoingMessages[0]
+	messageTopic, _ := connector.TopicFromCtx(message.Context())
+	assert.True(t, strings.HasPrefix(messageTopic, "devices/dummy_device/messages/events/"))
+	assert.Equal(t, payload, string(message.Payload))
 }

@@ -71,7 +71,7 @@ func main() {
 	logger.Infof("Starting azure connector %s", version)
 	flags.ConfigCheck(logger, *fConfigFile)
 
-	if err := app.MainLoop(settings, logger, nil, telemetryHandlers(), commandHandlers()); err != nil {
+	if err := app.MainLoop(settings, logger, nil, telemetryHandlers(settings), commandHandlers(settings)); err != nil {
 		logger.Error("Init failure", err, nil)
 
 		loggerOut.Close()
@@ -80,10 +80,12 @@ func main() {
 	}
 }
 
-func telemetryHandlers() []handlers.MessageHandler {
-	return []handlers.MessageHandler{passthrough.CreateTelemetryHandler()}
+func telemetryHandlers(settings *azurecfg.AzureSettings) []handlers.TelemetryHandler {
+	passthroughHandler := passthrough.CreateTelemetryHandler(settings.PassthroughTelemetryTopics)
+	return []handlers.TelemetryHandler{passthroughHandler}
 }
 
-func commandHandlers() []handlers.MessageHandler {
-	return []handlers.MessageHandler{passthrough.CreateCommandHandler()}
+func commandHandlers(settings *azurecfg.AzureSettings) []handlers.CommandHandler {
+	passthroughHandler := passthrough.CreateCommandHandler(settings.PassthroughCommandTopic)
+	return []handlers.CommandHandler{passthroughHandler}
 }

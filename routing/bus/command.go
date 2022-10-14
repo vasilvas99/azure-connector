@@ -30,24 +30,23 @@ const (
 
 type commandBusHandler struct {
 	logger          watermill.LoggerAdapter
-	commandHandlers []handlers.MessageHandler
+	commandHandlers []handlers.CommandHandler
 }
 
 // CommandBus creates the cloud message bus for processing the C2D messages from the Azure IoT Hub device.
 func CommandBus(router *message.Router,
 	mosquittoPub message.Publisher,
 	azureSub message.Subscriber,
-	settings *config.AzureSettings,
-	connSettings *config.AzureConnectionSettings,
-	commandHandlers []handlers.MessageHandler,
+	connInfo *config.RemoteConnectionInfo,
+	commandHandlers []handlers.CommandHandler,
 ) {
 	//Azure IoT Hub -> Message bus -> Mosquitto Broker -> Gateway
-	initCommandHandlers := []handlers.MessageHandler{}
+	initCommandHandlers := []handlers.CommandHandler{}
 	commandBusHandler := &commandBusHandler{
 		logger: router.Logger(),
 	}
 	for _, commandHandler := range commandHandlers {
-		if err := commandHandler.Init(settings, connSettings); err != nil {
+		if err := commandHandler.Init(connInfo); err != nil {
 			logFields := watermill.LogFields{"handler_name": commandHandler.Name()}
 			router.Logger().Error("skipping command handler that cannot be initialized", err, logFields)
 			continue
@@ -56,7 +55,7 @@ func CommandBus(router *message.Router,
 	}
 	commandBusHandler.commandHandlers = initCommandHandlers
 	router.AddHandler(commandHandlerName,
-		routing.CreateRemoteCloudTopic(connSettings.DeviceID),
+		routing.CreateRemoteCloudTopic(connInfo.DeviceID),
 		azureSub,
 		connector.TopicEmpty,
 		mosquittoPub,
