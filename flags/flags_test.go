@@ -66,8 +66,6 @@ func TestFlagsSet(t *testing.T) {
 		"configFile",
 		"tenantId",
 		"connectionString",
-		"passthroughTelemetryTopics",
-		"passthroughCommandTopic",
 		"sasTokenValidity",
 		"idScope",
 		"localAddress",
@@ -85,7 +83,8 @@ func TestFlagsSet(t *testing.T) {
 	for _, flagName := range flagNames {
 		assertFlagExists(t, flagName, f)
 	}
-	assertFlagNotExists(t, "messageMapperConfig", f)
+	assertFlagNotExists(t, "passthroughTelemetryTopics", f)
+	assertFlagNotExists(t, "passthroughCommandTopic", f)
 }
 
 func assertFlagExists(t *testing.T, flagName string, f *flag.FlagSet) {

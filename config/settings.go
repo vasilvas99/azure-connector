@@ -27,9 +27,6 @@ type AzureSettings struct {
 	SASTokenValidity string `json:"sasTokenValidity"`
 	IDScope          string `json:"idScope"`
 
-	PassthroughCommandTopic    string `json:"passthroughCommandTopic"`
-	PassthroughTelemetryTopics string `json:"passthroughTelemetryTopics"`
-
 	config.LocalConnectionSettings
 	logger.LogSettings
 	config.TLSSettings
@@ -49,8 +46,6 @@ func DefaultSettings() *AzureSettings {
 	}
 	defAzureSettings.LogFile = "logs/azure-connector.log"
 	defAzureSettings.LogFileMaxAge = 28
-	defAzureSettings.PassthroughTelemetryTopics = "device-to-cloud"
-	defAzureSettings.PassthroughCommandTopic = "cloud-to-device"
 	return defAzureSettings
 }
 

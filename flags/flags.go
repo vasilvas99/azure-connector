@@ -54,14 +54,6 @@ func Add(f *flag.FlagSet, settings *config.AzureSettings) {
 		flagSASTokenValidity, def.SASTokenValidity,
 		"The validity period for the generated SAS token for device authentication. Should be a positive integer number followed by a unit suffix, such as '300m', '1h', etc. Valid time units are 'm' (minutes), 'h' (hours), 'd' (days)",
 	)
-	f.StringVar(&settings.PassthroughTelemetryTopics,
-		"passthroughTelemetryTopics", def.PassthroughTelemetryTopics,
-		"The comma-separated list of passthrough telemetry MQTT topics the azure connector listens to on the local broker",
-	)
-	f.StringVar(&settings.PassthroughCommandTopic,
-		"passthroughCommandTopic", def.PassthroughCommandTopic,
-		"The passthrough command MQTT topic where all messages from the cloud are forwarded to on the local broker",
-	)
 	f.StringVar(&settings.IDScope, flagIDScope, def.IDScope,
 		"ID scope for Azure Device Provisioning service",
 	)
