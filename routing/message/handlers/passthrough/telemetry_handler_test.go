@@ -17,11 +17,20 @@ import (
 	"testing"
 
 	"github.com/ThreeDotsLabs/watermill/message"
+
 	"github.com/eclipse-kanto/azure-connector/config"
+
 	"github.com/eclipse-kanto/suite-connector/connector"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestCreateDefaultTelemetryHandler(t *testing.T) {
+	messageHandler := CreateDefaultTelemetryHandler()
+	assert.Equal(t, telemetryHandlerName, messageHandler.Name())
+	assert.Equal(t, topicsEvent, messageHandler.Topics())
+}
 
 func TestCreateTelemetryHandler(t *testing.T) {
 	topic := "localTopic1,localTopic2,localTopic3"

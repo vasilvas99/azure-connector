@@ -23,10 +23,9 @@ import (
 	"github.com/eclipse-kanto/suite-connector/config"
 	"github.com/eclipse-kanto/suite-connector/logger"
 
-	"github.com/eclipse-kanto/azure-connector/flags"
-
 	"github.com/eclipse-kanto/azure-connector/cmd/azure-connector/app"
-
+	azurecfg "github.com/eclipse-kanto/azure-connector/config"
+	"github.com/eclipse-kanto/azure-connector/flags"
 	"github.com/eclipse-kanto/azure-connector/routing/message/handlers"
 	"github.com/eclipse-kanto/azure-connector/routing/message/handlers/passthrough"
 )
@@ -38,9 +37,8 @@ var (
 func main() {
 	f := flag.NewFlagSet("azure-connector", flag.ContinueOnError)
 
-	cmd := defaultAzureSettingsExt()
-	flags.Add(f, cmd.AzureSettings)
-	addMessageHandlerFlags(f, cmd)
+	cmd := new(azurecfg.AzureSettings)
+	flags.Add(f, cmd)
 	fConfigFile := flags.AddGlobal(f)
 
 	if err := flags.Parse(f, os.Args[1:], version, os.Exit); err != nil {
@@ -51,7 +49,7 @@ func main() {
 		}
 	}
 
-	settings := defaultAzureSettingsExt()
+	settings := azurecfg.DefaultSettings()
 	if err := config.ReadConfig(*fConfigFile, settings); err != nil {
 		log.Fatal(errors.Wrap(err, "cannot parse config"))
 	}
@@ -74,7 +72,7 @@ func main() {
 	telemetryHandlers := telemetryHandlers(settings)
 	commandHandlers := commandHandlers(settings)
 
-	if err := app.MainLoop(settings.AzureSettings, logger, nil, telemetryHandlers, commandHandlers); err != nil {
+	if err := app.MainLoop(settings, logger, nil, telemetryHandlers, commandHandlers); err != nil {
 		logger.Error("Init failure", err, nil)
 
 		loggerOut.Close()
@@ -83,12 +81,12 @@ func main() {
 	}
 }
 
-func telemetryHandlers(settings *AzureSettingsExt) []handlers.TelemetryHandler {
-	passthroughHandler := passthrough.CreateTelemetryHandler(settings.PassthroughTelemetryTopics)
+func telemetryHandlers(settings *azurecfg.AzureSettings) []handlers.TelemetryHandler {
+	passthroughHandler := passthrough.CreateDefaultTelemetryHandler()
 	return []handlers.TelemetryHandler{passthroughHandler}
 }
 
-func commandHandlers(settings *AzureSettingsExt) []handlers.CommandHandler {
-	passthroughHandler := passthrough.CreateCommandHandler(settings.PassthroughCommandTopic)
+func commandHandlers(settings *azurecfg.AzureSettings) []handlers.CommandHandler {
+	passthroughHandler := passthrough.CreateDefaultCommandHandler()
 	return []handlers.CommandHandler{passthroughHandler}
 }
