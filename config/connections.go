@@ -28,7 +28,7 @@ import (
 	"github.com/eclipse-kanto/suite-connector/connector"
 )
 
-//CreateAzureHubConnection creates the MQTT connection to the remote Azure Iot Hub MQTT broker.
+// CreateAzureHubConnection creates the MQTT connection to the remote Azure Iot Hub MQTT broker.
 func CreateAzureHubConnection(
 	settings *AzureSettings, connSettings *AzureConnectionSettings, logger watermill.LoggerAdapter,
 ) (*connector.MQTTConnection, error) {

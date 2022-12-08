@@ -34,11 +34,11 @@ The project maintains all source code repositories in the following GitHub organ
 
 This project makes use of the follow third party projects.
 
-golang/go (1.17.2)
+golang/go (1.19.4)
 
 * License: BSD 3-Clause "New" or "Revised" License
 * Project: https://github.com/golang/go
-* Source:  https://github.com/golang/go/releases/tag/go1.17.2
+* Source:  https://github.com/golang/go/releases/tag/go1.19.4
 
 Jeffail/gabs (2.6.0)
 
@@ -142,12 +142,6 @@ google/go-tpm (0.3.2)
 * Project: https://github.com/google/go-tpm
 * Source:  https://github.com/google/go-tpm/releases/tag/v0.3.2
 
-golang.org/x/xerror (0.0.0-20191204190536-9bdfabe68543)
-
-* License: BSD 3-Clause "New" or "Revised" License
-* Project: https://github.com/golang/xerrors
-* Source:  https://github.com/golang/xerrors
-
 golang.org/x/net (0.0.0-20210405180319-a5a99cb37ef4)
 
 * License: BSD 3-Clause "New" or "Revised" License
@@ -165,12 +159,6 @@ golang.org/x/time (v0.0.0-20190308202827-9d24e82272b4)
 * License: BSD 3-Clause "New" or "Revised" License
 * Project: https://github.com/golang/time
 * Source:  https://github.com/golang/time/tree/9d24e82272b4f38b78bc8cff74fa936d31ccd8ef
-
-github.com/google/go-cmp (v0.5.4)
-
-* License: Licensed under the BSD 3-Clause "New" or "Revised" License
-* Project: https://github.com/google/go-cmp
-* Source:  https://github.com/google/go-cmp/releases/tag/v0.5.4
 
 tevino/abool (2.0.1)
 
