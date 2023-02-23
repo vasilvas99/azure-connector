@@ -160,12 +160,6 @@ golang.org/x/time (v0.0.0-20190308202827-9d24e82272b4)
 * Project: https://github.com/golang/time
 * Source:  https://github.com/golang/time/tree/9d24e82272b4f38b78bc8cff74fa936d31ccd8ef
 
-tevino/abool (2.0.1)
-
-* License: MIT License
-* Project: https://github.com/tevino/abool
-* Source:  https://github.com/tevino/abool/releases/tag/v2.0.1
-
 golang.org/x/sync (v0.0.0-20210220032951-036812b2e83c)
 
 * License: BSD 3-Clause "New" or "Revised" License
